@@ -99,17 +99,16 @@ namespace Edcore.GanttChart
 
     public class Header
     {
-        public Header(string title, string type, int index) : this(title, type, index, index, 100.0f) { }
+        public Header(string title, string type, int index) : this(title, type, index, 100.0f, true) { }
 
-        public Header(string title, string type, int index, int priority, float size)
+        public Header(string title, string type, int index, float size, bool editable)
         {
             Title = title;
             Type = type;
             Index = index;
-            Priority = priority;
             Size = size;
-
-            Hidden = false;
+            
+            Editable = editable;
         }
 
         public string Title { get; set; }
@@ -117,13 +116,11 @@ namespace Edcore.GanttChart
         public string Type { get; }
         public int Index { get; set; }
 
-        public int Priority { get; set; }
-
         public float Size { get; set; }
 
-        public bool Hidden { get; set; }
+        public bool Editable { get; set; }
 
-        public override string ToString() => $"(Index = {Index}, Title = {Title}, Type = {Type}, Priority = {Priority}, Size = {Size}, Hidden = {Hidden})";
+        public override string ToString() => $"(Index = {Index}, Title = {Title}, Type = {Type}, Size = {Size})";
     }
 
     /// <summary>
@@ -282,78 +279,37 @@ namespace Edcore.GanttChart
         /// <param name="index">Data to set to custom field</param>
         void SetCustomField(T task, string name, string data);
         /// <summary>
-        /// Converts a field index to a field name.
-        /// </summary>
-        /// <param name="index">Index to convert to field name</param>
-        string GetFieldName(int index);
-        /// <summary>
         /// Get the field index from a name
         /// </summary>
         int GetFieldIndex(string name);
-        /// <summary>
-        /// Get the field index from a priority index
-        /// </summary>
-        int GetFieldIndex(int priority);
         /// <summary>
         /// Get the header names
         /// </summary>
         List<string> GetHeaderNames();
         /// <summary>
-        /// Get the type of a header
-        /// </summary>
-        /// <param name="index">Index to convert to field name</param>
-        string GetFieldType(int index);
-        /// <summary>
-        /// Get the size of a header
-        /// </summary>
-        /// <param name="index">Index to convert to field name</param>
-        float GetFieldSize(int index);
-        /// <summary>
-        /// Get the priority of a header
-        /// </summary>
-        /// <param name="index">Index to convert to field name</param>
-        int GetFieldPriority(int index);
-        /// <summary>
-        /// Get the title of a header
-        /// </summary>
-        /// <param name="index">Index to convert to field name</param>
-        bool GetFieldHidden(int index);
-        /// <summary>
-        /// Change the name of a custom field
-        /// </summary>
-        /// <param name="index">Index pointing to custom field</param>
-        /// <param name="newName">Name of custom field</param>
-        void SetFieldName(int index, string newName);
-        /// <summary>
-        /// Set the field priority of a header
-        /// </summary>
-        /// <param name="index">Index of header</param>
-        void SetFieldPriority(int index, int priority);
-        /// <summary>
-        /// Set the field size of a header
-        /// </summary>
-        /// <param name="index">Index of header</param>
-        bool SetFieldSize(int index, float size);
-        /// <summary>
-        /// Set the field hidden of a header
-        /// </summary>
-        /// <param name="index">Index of header</param>
-        void SetFieldHidden(int index, bool hidden);
-        /// <summary>
-        /// Get the data of a field as a string
-        /// </summary>
-        /// <param name="task"></param>
-        /// <param name="index">Custom field index</param>
-        /// <returns></returns>
-        string GetData(T task, int index);
-        /// <summary>
-        /// Set the data of a string using field index
+        /// Get the formatted data of a field using field index
         /// </summary>
         /// <param name="task"></param>
         /// <param name="index">Custom field index</param>
         /// /// <param name="data"></param>
         /// <returns></returns>
-        bool SetData(T task, int index, string data);
+        string GetData(T task, int index);
+        /// <summary>
+        /// Set a field's data using field index
+        /// </summary>
+        /// <param name="task"></param>
+        /// <param name="index">Field index</param>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        void SetField(T task, int index, string data);
+        /// <summary>
+        /// Set a field's data using field index
+        /// </summary>
+        /// <param name="task"></param>
+        /// <param name="index">Field index</param>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        void SetField(T task, int index, TimeSpan data);
         /// <summary>
         /// Get the custom field of a task.
         /// </summary>
@@ -375,12 +331,6 @@ namespace Edcore.GanttChart
         /// <param name="task"></param>
         /// <param name="complete"></param>
         void SetComplete(T task, float complete);
-        /// <summary>
-        /// Set whether to collapse the specified group task. No effect on regular tasks.
-        /// </summary>
-        /// <param name="group"></param>
-        /// <param name="collasped"></param>
-        void SetCollapse(T group, bool collasped);
         /// <summary>
         /// Set the "now" time. Its value is the number of timescale units after the start time.
         /// </summary>

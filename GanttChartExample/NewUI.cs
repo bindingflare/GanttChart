@@ -131,9 +131,9 @@ namespace Edcore.GanttChart
             m_Chart.CreateTaskDelegate = delegate () { return new MyTask(m_Manager); };
 
             // Initialize the Tasklist with our ProjectManager and Chart
-            dataTreeListView1.RowHeight = m_Chart.BarSpacing;
+            m_TaskList.RowHeight = m_Chart.BarSpacing;
             //dataTreeListView1.Scrollbars = System.Windows.Forms.RichTextBoxScrollBars.None;
-            generateListView(dataTreeListView1, m_Manager.getHeaders()); // Lazy getHeaders() which needs changing later
+            GenerateListView(m_TaskList, m_Manager.HeaderList); // Lazy getHeaders() which needs changing later
             //Generator.GenerateColumns(dataTreeListView1, typeof(MyTask), false);
 
             IEnumerable<Task> tasks = m_Manager.RootTasks;
@@ -145,18 +145,18 @@ namespace Edcore.GanttChart
                     task.CanExpand = true;
                 }
             }
-            dataTreeListView1.CanExpandGetter = delegate (object x) { return ((Task) x).CanExpand; };
-            dataTreeListView1.ChildrenGetter = delegate (object x) { return ((Task) x).Children; };
-            dataTreeListView1.AllowColumnReorder = true;
-            dataTreeListView1.CellEditActivation = ObjectListView.CellEditActivateMode.SingleClick;
+            m_TaskList.CanExpandGetter = delegate (object x) { return ((Task) x).CanExpand; };
+            m_TaskList.ChildrenGetter = delegate (object x) { return ((Task) x).Children; };
+            m_TaskList.AllowColumnReorder = true;
+            m_TaskList.CellEditActivation = ObjectListView.CellEditActivateMode.SingleClick;
             //dataTreeListView1.sort
 
-            dataTreeListView1.RebuildColumns();
-            dataTreeListView1.SetObjects(tasks);
-            dataTreeListView1.ExpandAll();
+            //dataTaskTreeView.RebuildColumns();
+            m_TaskList.SetObjects(tasks);
+            m_TaskList.ExpandAll();
             //m_Tasklist.Init(m_Manager, m_Chart);
 
-            // Attach event listeners for events we are interested in
+            // GanttChart event listeners
             m_Chart.TaskMouseOver += new EventHandler<TaskMouseEventArgs>(m_Chart_TaskMouseOver);
             m_Chart.TaskMouseOut += new EventHandler<TaskMouseEventArgs>(m_Chart_TaskMouseOut);
             m_Chart.TaskSelected += new EventHandler<TaskMouseEventArgs>(m_Chart_TaskSelected);
@@ -167,6 +167,10 @@ namespace Edcore.GanttChart
             m_Chart.AllowTaskDragDrop = true;
             m_Chart.Scroll += new ScrollEventHandler(_mChart_Scroll);
             m_Chart.MouseWheel += new MouseEventHandler(_mChart_MouseWheel);
+
+            // Tasklist event listeners
+            m_TaskList.Expanded += new EventHandler<TreeBranchExpandedEventArgs>(m_TaskList_Expanded);
+            m_TaskList.Collapsed += new EventHandler<TreeBranchCollapsedEventArgs>(m_TaskList_Collapsed);
 
             //m_Tasklist.TaskListMouseClick += new EventHandler<TaskListMouseEventArgs>(_mChart_TaskListMouseClick);
 
@@ -195,18 +199,38 @@ namespace Edcore.GanttChart
             _InitExampleUI();
         }
 
+        private void m_TaskList_Collapsed(object sender, TreeBranchCollapsedEventArgs e)
+        {
+            ((Task) e.Model).IsCollapsed = true;
+            m_Chart.Invalidate();
+        }
+
+        private void m_TaskList_Expanded(object sender, TreeBranchExpandedEventArgs e)
+        {
+            ((Task) e.Model).IsCollapsed = false;
+            m_Chart.Invalidate();
+        }
+
         private void m_Chart_TaskMouseDoubleClick(object sender, TaskMouseEventArgs e)
         {
             if(e.Button == MouseButtons.Left)
             {
-                dataTreeListView1.ToggleExpansion(e.Task);
+                // this check happens BEFORE IsCollapsed is toggled by double click
+                if(!e.Task.IsCollapsed)
+                {
+                    m_TaskList.Collapse(e.Task);
+                }
+                else
+                {
+                    m_TaskList.Expand(e.Task);
+                }
             }
         }
 
         private void _mChart_MouseWheel(object sender, MouseEventArgs e)
         {
             int delta = e.Delta > 0 ? -m_Chart.Viewport.WheelDelta : m_Chart.Viewport.WheelDelta;
-            dataTreeListView1.LowLevelScroll(0, delta);
+            m_TaskList.LowLevelScroll(0, delta);
         }
 
         private void _mChart_Scroll(object sender, ScrollEventArgs e)
@@ -215,14 +239,14 @@ namespace Edcore.GanttChart
             {
                 //float ratio = (float) dataTreeListView1.GetItemCount() * m_Chart.BarSpacing / m_Chart.Viewport.WorldHeight;
                 int delta = e.NewValue - e.OldValue;
-                dataTreeListView1.LowLevelScroll(0, delta);
+                m_TaskList.LowLevelScroll(0, delta);
             }
 
             //int h1 = dataTreeListView1.Height * dataTreeListView1.RowHeight;
             //float h2 = m_Chart.Viewport.WorldHeight;
         }
 
-        public void generateListView(ObjectListView objectListView, List<Header> headerList)
+        public void GenerateListView(ObjectListView objectListView, List<Header> headerList)
         {
             List<OLVColumn> columnsList = new List<OLVColumn>();
             foreach (Header header in headerList)
@@ -240,25 +264,6 @@ namespace Edcore.GanttChart
 
             objectListView.Columns.AddRange(columnsList.Cast<ColumnHeader>().ToArray());
             objectListView.RebuildColumns();
-        }
-
-        private void _mChart_TaskListMouseClick(object sender, TaskListMouseEventArgs e)
-        {
-            if (e.Task != null)
-            {
-                if (e.Button == MouseButtons.Right)
-                {
-                    taskMenuStrip.Show(this, new Point(e.X, e.Y));
-                }
-            }
-            else
-            {
-                if (e.Button == MouseButtons.Right)
-                {
-                    headerMenuStrip.Show(this, new Point(e.X, e.Y));
-                }
-            }
-
         }
 
         void m_Chart_TaskSelected(object sender, TaskMouseEventArgs e)
@@ -446,7 +451,7 @@ namespace Edcore.GanttChart
 
         #endregion Main Menu
 
-        #region Sidebar
+        #region CustomView
 
         private void _mDateTimePicker_ValueChanged(object sender, EventArgs e)
         {
@@ -526,7 +531,7 @@ namespace Edcore.GanttChart
             return task.Name;
         }
 
-        #endregion Sidebar
+        #endregion CustomView
 
         #region Print
 
@@ -624,7 +629,7 @@ namespace Edcore.GanttChart
                     break;
                 case 1:
                     // task tree dataGrid
-                    UpdateTreeView(); // update TaskTreeView
+                    UpdateTreeView();
                     taskForm.Size = new System.Drawing.Size(400, taskForm.Height);
                     break;
                 case 2:
@@ -689,7 +694,7 @@ namespace Edcore.GanttChart
             int index = 0; //m_Tasklist.SelectedFieldIndex;
             var task = m_Chart.SelectedTask;
 
-            string fieldName = m_Manager.GetFieldName(index);
+            string fieldName = m_Manager.HeaderList[index].Title;
             string data = m_Manager.GetData(task, index);
 
             string input;
@@ -811,15 +816,20 @@ namespace Edcore.GanttChart
         private void resizeHeaderToolStripMenuItem_Click(object sender, EventArgs e)
         {
             int index = 0; // m_Tasklist.SelectedFieldIndex;
-            string header = m_Manager.GetFieldName(index);
+            string header = m_Manager.HeaderList[index].Title;
 
             string input;
-            if (_promptString("Enter a new size:", "Edit header", m_Manager.GetFieldSize(index).ToString(), "Enter a valid number!", out input))
+            if (_promptString("Enter a new size:", "Edit header", m_Manager.HeaderList[index].Size.ToString(), "Enter a valid number!", out input))
             {
                 float size = float.Parse(input);
-                if(!m_Manager.SetFieldSize(index, size))
+
+                if (m_Manager.FieldMinSize > size || m_Manager.FieldMaxSize < size)
                 {
                     MessageBox.Show("Field size should be between " + m_Manager.FieldMinSize + " and " + m_Manager.FieldMaxSize, "", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                else
+                {
+                    m_Manager.HeaderList[index].Size = size;
                 }
                 //m_Tasklist.RecalculateTasklist();
                 //m_Tasklist.Invalidate();
@@ -830,40 +840,15 @@ namespace Edcore.GanttChart
         private void editHeaderNameToolStripMenuItem_Click(object sender, EventArgs e)
         {
             int index = 0; // m_Tasklist.SelectedFieldIndex;
-            string header = m_Manager.GetFieldName(index);
+            string header = m_Manager.HeaderList[index].Title;
 
             string input;
             if (_promptString("Change name of header [" + header + "] to:", "Edit header", header, "Task name cannot be empty", out input))
             {
-                m_Manager.SetFieldName(index, input);
+                m_Manager.HeaderList[index].Title = input;
                // m_Tasklist.Invalidate(); // in case of change in text alignment
             }
         }
-
-        private void hideHeaderToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            int index = 0; // m_Tasklist.SelectedFieldIndex;
-            m_Manager.SetFieldHidden(index, true);
-            //m_Tasklist.RecalculateTasklist();
-            //m_Tasklist.Invalidate();
-        }
-
-        private void headerOrderToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            int index = 0; // m_Tasklist.SelectedFieldIndex;
-            int priority = m_Manager.GetFieldPriority(index);
-            string header = m_Manager.GetFieldName(index);
-
-            string input;
-            if (_promptString("Change priority of header [" + header + "] to:", "Edit header", priority.ToString(), "Enter a valid number", out input))
-            {
-                int newPriority = int.Parse(input);
-                m_Manager.SetFieldPriority(index, newPriority);
-                //m_Tasklist.RecalculateTasklist();
-                //m_Tasklist.Invalidate();// in case of change in text alignment
-            }
-        }
-
 
         private void createCustomFieldToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -891,46 +876,6 @@ namespace Edcore.GanttChart
                 {
                     MessageBox.Show("Cannot delete important field", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
-            }
-        }
-
-        private void showHiddenFieldToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            List<string> hiddenFields = new List<string>();
-            for(int index = 0; index < m_Manager.FieldCount; index++)
-            {
-                if(m_Manager.GetFieldHidden(index))
-                {
-                    hiddenFields.Add(m_Manager.GetFieldName(index));
-                }
-            }
-
-            int input;
-            if (_promptList("Select a field to show", "Show hidden", hiddenFields, out input))
-            {
-                // Convert input back to index
-                input++;
-                int index = 0;
-
-                int hiddenCount = 0;
-                for(int i = 0; i < m_Manager.FieldCount; i++)
-                {
-                    if(m_Manager.GetFieldHidden(i))
-                    {
-                        hiddenCount++;
-                    }
-
-                    if (hiddenCount == input)
-                    {
-                        index = i;
-                        break;
-                    }
-                }
-                
-
-                m_Manager.SetFieldHidden(index, false);
-                //m_Tasklist.RecalculateTasklist();
-                //m_Tasklist.Invalidate();
             }
         }
 

@@ -35,7 +35,8 @@ namespace Edcore.GanttChart
         Dictionary<T, T> m_splitTaskOfPartMap = new Dictionary<T, T>(); // Map a task part to the original split task
         Dictionary<T, T> m_groupOfMemberMap = new Dictionary<T, T>(); // Map member task to parent group task
         Dictionary<T, int> m_taskIndicesMap = new Dictionary<T, int>(); // Map the task to its zero-based index order position
-        List<Header> m_HeaderList = new List<Header>(); // Map the userFields to array position in Task.UserFields
+
+        public List<Header> HeaderList = new List<Header>(); // Map the userFields to array position in Task.UserFields
 
         public float FieldMinSize = 20;
         public float FieldMaxSize = 1000;
@@ -50,14 +51,19 @@ namespace Edcore.GanttChart
             Name = projectName;
 
             // Add default headers
-            m_HeaderList.Add(new Header("Name", "tree", 0, 0, 200f));
-            m_HeaderList.Add(new Header("Start", "date", 1, 1, 125f));
-            m_HeaderList.Add(new Header("End", "date", 2, 2, 125f));
-            m_HeaderList.Add(new Header("Duration", "time", 3, 3, 80f));
+            HeaderList.Add(new Header("Name", "tree", 0, 200f, true));
+            HeaderList.Add(new Header("Start", "date", 1, 125f, true));
+            HeaderList.Add(new Header("End", "date", 2, 125f, true));
+            HeaderList.Add(new Header("Duration", "time", 3, 80f, true));
 
             FieldCount = 4;
             CustomFieldCount = 0;
         }
+
+        /// <summary>
+        /// Get or set the name of the project
+        /// </summary>
+        public string Name { get; set; }
 
         /// <summary>
         /// Get or set the TimeSpan we are at now from Start DateTime
@@ -744,7 +750,6 @@ namespace Edcore.GanttChart
             }
         }
 
-        public string Name { get; set; }
 
         /// <summary>
         /// Enumerate through all the resources that has been assigned to the specified task.
@@ -1101,7 +1106,7 @@ namespace Edcore.GanttChart
         {
             Header h = new Header(name, type, FieldCount);
             h.Size = size;
-            m_HeaderList.Add(h);
+            HeaderList.Add(h);
 
             FieldCount++;
             CustomFieldCount++;
@@ -1116,11 +1121,6 @@ namespace Edcore.GanttChart
             }
         }
 
-        public List<Header> getHeaders()
-        {
-            return m_HeaderList;
-        }
-
         /// <summary>
         /// Removes a user-defined field of a task.
         /// </summary>
@@ -1128,8 +1128,7 @@ namespace Edcore.GanttChart
         /// <returns></returns>
         public void RemoveCustomField(int index)
         {
-            _RemovePriority(index);
-            m_HeaderList.RemoveAt(index);
+            HeaderList.RemoveAt(index);
 
             FieldCount--;
             CustomFieldCount--;
@@ -1182,45 +1181,6 @@ namespace Edcore.GanttChart
             return null;
         }
 
-        public bool SetData(T task, int index, string data)
-        {
-            if(index == 0)
-            {
-                task.Name = data;
-            }
-            else if (index > 3)
-            {
-                task.CustomFieldsData[index - 4] = data;
-            }
-
-            return false;
-        }
-
-        public bool SetData(T task, int index, TimeSpan data)
-        {
-            if (index > 0 && index <= 3)
-            {
-                switch(index)
-                {
-                    case 1:
-                        SetStart(task, data);
-                        return true;
-                    case 2:
-                        SetDuration(task, data);
-                        return true;
-                    case 3:
-                        SetEnd(task, data);
-                        return true;
-                }
-            }
-            else if (index > 3)
-            {
-                // Currently custom fields do not support custom types
-            }
-
-            return false;
-        }
-
         public string GetCustomField(T task, int index)
         {
             return task.CustomFieldsData[index - 4];
@@ -1230,7 +1190,7 @@ namespace Edcore.GanttChart
         {
             List<string> names = new List<string>();
 
-            foreach(Header h in m_HeaderList)
+            foreach(Header h in HeaderList)
             {
                 names.Add(h.Title);
             }
@@ -1249,14 +1209,57 @@ namespace Edcore.GanttChart
             SetCustomField(task, index - 4, data);
         }
 
-        public string GetFieldName(int index)
+        /// <summary>
+        /// Set a field's data using field index
+        /// </summary>
+        /// <param name="task"></param>
+        /// <param name="index">Field index</param>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public void SetField(T task, int index, string data)
         {
-            return m_HeaderList.ElementAt(index).Title;
+            switch(index)
+            {
+                case 0:
+                    task.Name = data;
+                    break;
+                default:
+                    // Custom field
+                    SetCustomField(task, index, data);
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Set a field's data using field index
+        /// </summary>
+        /// <param name="task"></param>
+        /// <param name="index">Field index</param>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public void SetField(T task, int index, TimeSpan data)
+        {
+            switch (index)
+            {
+                case 1:
+                    SetStart(task, data);
+                    break;
+                case 2:
+                    SetEnd(task, data);
+                    break;
+                case 3:
+                    SetDuration(task, data);
+                    break;
+                default:
+                    // Custom field
+                    throw new NotImplementedException(); // TODO: Allow more forms of cu
+                    // break;
+            }
         }
 
         public int GetFieldIndex(string name) // warning: for fields with duplicate names, can cause unwanted behavior
         {
-            foreach (Header h in m_HeaderList)
+            foreach (Header h in HeaderList)
             {
                 if (h.Title.Equals(name))
                 {
@@ -1265,96 +1268,6 @@ namespace Edcore.GanttChart
             }
 
             return -1;
-        }
-
-        public int GetFieldIndex(int priority)
-        {
-            foreach (Header h in m_HeaderList)
-            {
-                if (h.Priority == priority)
-                {
-                    return h.Index;
-                }
-            }
-
-            return -1;
-        }
-
-        public string GetFieldType(int index)
-        {
-            return m_HeaderList.ElementAt(index).Type;
-        }
-
-        public int GetFieldPriority(int index)
-        {
-            return m_HeaderList.ElementAt(index).Priority;
-        }
-
-        public float GetFieldSize(int index)
-        {
-            return m_HeaderList.ElementAt(index).Size;
-        }
-
-        public bool GetFieldHidden(int index)
-        {
-            return m_HeaderList.ElementAt(index).Hidden;
-        }
-        public void SetFieldName(int index, string newName)
-        {
-            m_HeaderList.ElementAt(index).Title = newName;
-        }
-
-        public void SetFieldPriority(int index, int priority)
-        {
-            int oldPriority = m_HeaderList.ElementAt(index).Priority;
-
-            int rangeS = priority;
-            int rangeE = oldPriority - 1;
-
-            int modifier = 1;
-
-            if(oldPriority < priority)
-            {
-                rangeS = oldPriority + 1;
-                rangeE = priority;
-                modifier = -1;
-            }
-            
-
-            for (int i = 0; i < FieldCount; i++)
-            {
-                Header h = m_HeaderList.ElementAt(i);
-                if (h.Priority >= rangeS && h.Priority <= rangeE)
-                    h.Priority += modifier;
-            }
-
-
-            m_HeaderList.ElementAt(index).Priority = priority;
-        }
-        public bool SetFieldSize(int index, float size)
-        {
-            if (size < FieldMinSize || size > FieldMaxSize)
-                return false;
-
-            m_HeaderList.ElementAt(index).Size = size;
-            return true;
-        }
-
-        public void SetFieldHidden(int index, bool hidden)
-        {
-            m_HeaderList.ElementAt(index).Hidden = hidden;
-        }
-
-        private void _RemovePriority(int index)
-        {
-            int indexPriority = GetFieldPriority(index);
-
-            for (int target = 0; target < FieldCount; target++)
-            {
-                int targetPriority = GetFieldPriority(target);
-                if (targetPriority > indexPriority)
-                    m_HeaderList[target].Priority = targetPriority - 1;
-            }
         }
 
         /// <summary>

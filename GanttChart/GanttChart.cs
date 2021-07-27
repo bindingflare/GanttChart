@@ -979,11 +979,11 @@ namespace Edcore.GanttChart
         {
             TaskMouseDoubleClick?.Invoke(this, e);
 
-            if (e.Button == System.Windows.Forms.MouseButtons.Left)
-            {
-                e.Task.IsCollapsed = !e.Task.IsCollapsed;
-            }
-            else if (e.Button == System.Windows.Forms.MouseButtons.Right)
+            //if (e.Button == System.Windows.Forms.MouseButtons.Left) // Handled in UI instead
+            //{
+            //    //e.Task.IsCollapsed = !e.Task.IsCollapsed;
+            //}
+            if (e.Button == System.Windows.Forms.MouseButtons.Right)
             {
                 TimeSpan duration = GetSpan(Viewport.DeviceToWorldCoord(e.Location).X - e.Rectangle.Left);
                 if (m_Project.IsPart(e.Task)) m_Project.Split(e.Task, CreateTaskDelegate(), duration);
