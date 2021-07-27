@@ -44,20 +44,22 @@ namespace Edcore.GanttChart
         /// <summary>
         /// Create a new Project
         /// </summary>
-        public ProjectManager(String projectName)
+        public ProjectManager(string projectName)
         {
             Now = TimeSpan.Zero;
             Start = DateTime.Now;
             Name = projectName;
 
             // Add default headers
-            HeaderList.Add(new Header("Name", "tree", 0, 200f, true));
-            HeaderList.Add(new Header("Start", "date", 1, 125f, true));
-            HeaderList.Add(new Header("End", "date", 2, 125f, true));
-            HeaderList.Add(new Header("Duration", "time", 3, 80f, true));
+            HeaderList.Add(new Header("Name", "tree", 1, 200f));
+            HeaderList.Add(new Header("ID", "string", 0, 60f, false, true));
+            HeaderList.Add(new Header("Start", "date", 2, 125f));
+            HeaderList.Add(new Header("End", "date", 3, 125f));
+            HeaderList.Add(new Header("Duration", "time", 4, 80f));
+            HeaderList.Add(new Header("Complete", "string", 5, 60f, true, true));
 
-            FieldCount = 4;
-            CustomFieldCount = 0;
+            FieldCount = 6;
+            MainFieldCount = 6;
         }
 
         /// <summary>
@@ -78,7 +80,7 @@ namespace Edcore.GanttChart
         /// <summary>
         /// Get the number of custom user fields
         /// </summary>
-        public int CustomFieldCount { get; private set; }
+        public int MainFieldCount { get; private set; }
 
         /// <summary>
         /// Get or set the starting date for this project
@@ -111,7 +113,7 @@ namespace Edcore.GanttChart
                 m_groupOfMemberMap[task] = null;
 
                 // Set custom fields size
-                task.CustomFieldsData = new string[CustomFieldCount]; // TODO Add overload for task with customfieldsdata
+                task.CustomFieldsData = new string[FieldCount - MainFieldCount]; // TODO Add overload for task with customfieldsdata
             }
         }
 
@@ -1104,18 +1106,19 @@ namespace Edcore.GanttChart
         /// <returns></returns>
         public void AddCustomField(string name, string type, float size)
         {
-            Header h = new Header(name, type, FieldCount);
+            Header h = new Header(name, type, FieldCount, 150f);
             h.Size = size;
             HeaderList.Add(h);
 
             FieldCount++;
-            CustomFieldCount++;
 
             // Update custom fields in each task
+            int length = FieldCount - MainFieldCount;
+
             foreach (T task in Tasks)
             {
                 var arr = task.CustomFieldsData;
-                Array.Resize(ref arr, CustomFieldCount);
+                Array.Resize(ref arr, length);
 
                 task.CustomFieldsData = arr;
             }
@@ -1131,19 +1134,19 @@ namespace Edcore.GanttChart
             HeaderList.RemoveAt(index);
 
             FieldCount--;
-            CustomFieldCount--;
 
             // Update custom fields in each task
+            int length = FieldCount - MainFieldCount;
             foreach (T task in Tasks)
             {
                 string[] oldData = task.CustomFieldsData;
-                var newData = new string[CustomFieldCount];
+                var newData = new string[length];
 
-                int target = index - 4;
+                int target = index - MainFieldCount;
                 int modifier = 0;
                 for (int i = 0; i < oldData.Length; i++)
                 {
-                    if(i != target)
+                    if (i != target)
                     {
                         newData[i + modifier] = oldData[i];
                     }
@@ -1157,40 +1160,84 @@ namespace Edcore.GanttChart
             }
         }
 
-        public string GetData(T task, int index)
+        public object GetField(T task, int index)
         {
-            if (index == 0)
-            {
-                return task.Name;
-            }
-            else if (index > 3)
-            {
-                return GetCustomField(task, index);
-            }
-
             switch (index)
             {
+                case 0:
+                    return "ID";
                 case 1:
-                    return GetDateTime(task.Start).ToString("yyyy.MM.dd hh:mm:ss");
+                    return task.Name;
                 case 2:
-                    return GetDateTime(task.End).ToString("yyyy.MM.dd hh:mm:ss");
+                    return GetDateTime(task.Start);
                 case 3:
-                    return task.Duration.ToString(@"dd\.hh\:mm\:ss");
+                    return GetDateTime(task.End);
+                case 4:
+                    return task.Duration;
+                case 5:
+                    return task.Complete;
+                default:
+                    return task.CustomFieldsData[index - MainFieldCount];
             }
-
-            return null;
         }
 
-        public string GetCustomField(T task, int index)
+        public string GetFieldString(T task, int index)
         {
-            return task.CustomFieldsData[index - 4];
+            switch (index)
+            {
+                case 0:
+                    return "ID";
+                case 1:
+                    return task.Name;
+                case 2:
+                    return GetDateTime(task.Start).ToString("yyyy.MM.dd hh:mm:ss");
+                case 3:
+                    return GetDateTime(task.End).ToString("yyyy.MM.dd hh:mm:ss");
+                case 4:
+                    return task.Duration.ToString(@"dd\.hh\:mm\:ss");
+                case 5:
+                    return task.Complete.ToString("%");
+                default:
+                    return task.CustomFieldsData[index - MainFieldCount];
+            }
+        }
+
+        public string FormatData(object data)
+        {
+            if (data is string)
+            {
+                return (string)data;
+            }
+            else if (data is DateTime)
+            {
+                return ((DateTime)data).ToString("yyyy.MM.dd hh:mm:ss");
+            }
+            else if (data is TimeSpan)
+            {
+                return ((TimeSpan)data).ToString(@"dd\.hh\:mm\:ss");
+            }
+            else if (data is float)
+            {
+                return ((float)data).ToString("%");
+            }
+            else
+            {
+                if (data == null)
+                {
+                    return "";
+                }
+                else
+                {
+                    return data.ToString();
+                }
+            }
         }
 
         public List<string> GetHeaderNames()
         {
             List<string> names = new List<string>();
 
-            foreach(Header h in HeaderList)
+            foreach (Header h in HeaderList)
             {
                 names.Add(h.Title);
             }
@@ -1198,17 +1245,6 @@ namespace Edcore.GanttChart
             return names;
         }
 
-        public void SetCustomField(T task, int index, string data)
-        {
-            task.CustomFieldsData[index] = data;
-        }
-
-        public void SetCustomField(T task, string fieldName, string data)
-        {
-            int index = GetFieldIndex(fieldName);
-            SetCustomField(task, index - 4, data);
-        }
-
         /// <summary>
         /// Set a field's data using field index
         /// </summary>
@@ -1216,18 +1252,23 @@ namespace Edcore.GanttChart
         /// <param name="index">Field index</param>
         /// <param name="data"></param>
         /// <returns></returns>
-        public void SetField(T task, int index, string data)
+        public bool SetField(T task, int index, string data)
         {
-            switch(index)
+            switch (index)
             {
                 case 0:
                     task.Name = data;
                     break;
+                case 5:
+                    task.Complete = float.Parse(data);
+                    break;
                 default:
                     // Custom field
-                    SetCustomField(task, index, data);
+                    task.CustomFieldsData[index - MainFieldCount] = data;
                     break;
             }
+
+            return true;
         }
 
         /// <summary>
@@ -1237,24 +1278,26 @@ namespace Edcore.GanttChart
         /// <param name="index">Field index</param>
         /// <param name="data"></param>
         /// <returns></returns>
-        public void SetField(T task, int index, TimeSpan data)
+        public bool SetField(T task, int index, TimeSpan data)
         {
             switch (index)
             {
-                case 1:
+                case 2:
                     SetStart(task, data);
                     break;
-                case 2:
+                case 3:
                     SetEnd(task, data);
                     break;
-                case 3:
+                case 4:
                     SetDuration(task, data);
                     break;
                 default:
                     // Custom field
-                    throw new NotImplementedException(); // TODO: Allow more forms of cu
+                    return false; // TODO: Allow more forms of cu
                     // break;
             }
+
+            return true;
         }
 
         public int GetFieldIndex(string name) // warning: for fields with duplicate names, can cause unwanted behavior

@@ -99,9 +99,9 @@ namespace Edcore.GanttChart
 
     public class Header
     {
-        public Header(string title, string type, int index) : this(title, type, index, 100.0f, true) { }
+        public Header(string title, string type, int index, float size) : this(title, type, index, size, true, false) { }
 
-        public Header(string title, string type, int index, float size, bool editable)
+        public Header(string title, string type, int index, float size, bool editable, bool hidden)
         {
             Title = title;
             Type = type;
@@ -109,6 +109,7 @@ namespace Edcore.GanttChart
             Size = size;
             
             Editable = editable;
+            Hidden = hidden;
         }
 
         public string Title { get; set; }
@@ -119,6 +120,8 @@ namespace Edcore.GanttChart
         public float Size { get; set; }
 
         public bool Editable { get; set; }
+
+        public bool Hidden { get; set; }
 
         public override string ToString() => $"(Index = {Index}, Title = {Title}, Type = {Type}, Size = {Size})";
     }
@@ -272,13 +275,6 @@ namespace Edcore.GanttChart
         /// <param name="name">Name of custom field</param>
         void RemoveCustomField(int index);
         /// <summary>
-        /// Set a tasks custom field using a valid custom field name.
-        /// </summary>
-        /// <param name="task"></param>
-        /// <param name="name">Custom field name</param>
-        /// <param name="index">Data to set to custom field</param>
-        void SetCustomField(T task, string name, string data);
-        /// <summary>
         /// Get the field index from a name
         /// </summary>
         int GetFieldIndex(string name);
@@ -287,43 +283,37 @@ namespace Edcore.GanttChart
         /// </summary>
         List<string> GetHeaderNames();
         /// <summary>
+        /// Get the data of a field using field index
+        /// </summary>
+        /// <param name="task"></param>
+        /// <param name="index">Custom field index</param>
+        /// /// <param name="data"></param>
+        /// <returns></returns>
+        object GetField(T task, int index);
+        /// <summary>
         /// Get the formatted data of a field using field index
         /// </summary>
         /// <param name="task"></param>
         /// <param name="index">Custom field index</param>
         /// /// <param name="data"></param>
         /// <returns></returns>
-        string GetData(T task, int index);
+        string GetFieldString(T task, int index);
         /// <summary>
         /// Set a field's data using field index
         /// </summary>
         /// <param name="task"></param>
         /// <param name="index">Field index</param>
         /// <param name="data"></param>
-        /// <returns></returns>
-        void SetField(T task, int index, string data);
+        /// <returns>Boolean on the success of the operation</returns>
+        bool SetField(T task, int index, string data);
         /// <summary>
         /// Set a field's data using field index
         /// </summary>
         /// <param name="task"></param>
         /// <param name="index">Field index</param>
         /// <param name="data"></param>
-        /// <returns></returns>
-        void SetField(T task, int index, TimeSpan data);
-        /// <summary>
-        /// Get the custom field of a task.
-        /// </summary>
-        /// <param name="task"></param>
-        /// <param name="index">Custom field index</param>
-        /// <returns></returns>
-        string GetCustomField(T task, int index);
-        /// <summary>
-        /// Set a tasks custom field using a valid index.
-        /// </summary>
-        /// <param name="task"></param>
-        /// <param name="index">Custom field index</param>
-        /// <param name="data">Data to set to custom field</param>
-        void SetCustomField(T task, int index, string data);
+        /// <returns>Boolean on the success of the operation</returns>
+        bool SetField(T task, int index, TimeSpan data);
         /// <summary>
         /// Set the percentage complete of the specified task from 0.0f to 1.0f.
         /// No effect on group tasks as they will get the aggregated percentage complete of all child tasks

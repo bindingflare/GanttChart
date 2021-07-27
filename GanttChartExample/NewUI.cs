@@ -22,7 +22,7 @@ namespace Edcore.GanttChart
         ProjectManager m_Manager = null;
 
         Form taskForm = null;
-        
+
 
         /// <summary>
         /// Example starts here
@@ -31,10 +31,30 @@ namespace Edcore.GanttChart
         {
             InitializeComponent();
 
-            // Create a Project and some Tasks
+            // Create a Project
             m_Manager = new ProjectManager("256K DRAM 7월 진척현황");
-            m_Manager.AddCustomField("Important", "string", 80.0f);
-            m_Manager.AddCustomField("Cancelled", "string", 80.0f);
+
+            // Title label
+            projectTitleLabel.Text = m_Manager.Name;
+            projectTitleLabel.Font = new Font(Font.FontFamily, 16f, FontStyle.Bold);
+
+            // Initialize the Chart with our ProjectManager and CreateTaskDelegate
+            m_Chart.Init(m_Manager);
+            m_Chart.CreateTaskDelegate = delegate () { return new MyTask(m_Manager); };
+
+            // Initialize the Tasklist
+            m_TaskList.RowHeight = m_Chart.BarSpacing;
+            m_TaskList.CanExpandGetter = delegate (object x) { return ((Task)x).CanExpand; };
+            m_TaskList.ChildrenGetter = delegate (object x) { return ((Task)x).Children; };
+            m_TaskList.AllowColumnReorder = true;
+            m_TaskList.CellEditActivation = ObjectListView.CellEditActivateMode.SingleClick;
+
+            GenerateListView(m_TaskList, m_Manager.HeaderList);
+            //Control.ControlCollection col = m_TaskList.Scro;
+
+            // Perform some task operations
+            _registerCustomField("Important", "string", 80.0f);
+            _registerCustomField("Cancelled", "string", 80.0f);
 
             var work = new MyTask(m_Manager) { Name = "Prepare for Work" };
             var wake = new MyTask(m_Manager) { Name = "Wake Up" };
@@ -52,15 +72,15 @@ namespace Edcore.GanttChart
             m_Manager.Add(hair);
             m_Manager.Add(pack);
 
-            m_Manager.SetCustomField(work, 0, "Hello");
-            m_Manager.SetCustomField(wake, 0, "HI");
-            m_Manager.SetCustomField(teeth, 0, "hey");
-            m_Manager.SetCustomField(shower, 0, "Yo");
-            m_Manager.SetCustomField(clothes, 0, "Greetings");
-            m_Manager.SetCustomField(hair, 0, "Good morning");
-            m_Manager.SetCustomField(pack, 0, "Good evening");
+            m_Manager.SetField(work, 6, "Hello");
+            m_Manager.SetField(wake, 6, "HI");
+            m_Manager.SetField(teeth, 6, "hey");
+            m_Manager.SetField(shower, 6, "Yo");
+            m_Manager.SetField(clothes, 6, "Greetings");
+            m_Manager.SetField(hair, 6, "Good morning");
+            m_Manager.SetField(pack, 6, "Good evening");
 
-            m_Manager.SetCustomField(work, "Important", "Yes");
+            //m_Manager.SetField(work, "Important", "Yes");
 
             // Create another 1000 tasks for stress testing
             Random rand = new Random();
@@ -122,40 +142,20 @@ namespace Edcore.GanttChart
             m_Manager.Assign(shower, lucas);
             m_Manager.Assign(shower, john);
 
-            // Title label
-            projectTitleLabel.Text = m_Manager.Name;
-            projectTitleLabel.Font = new Font(Font.FontFamily, 16f, FontStyle.Bold);
-
-            // Initialize the Chart with our ProjectManager and CreateTaskDelegate
-            m_Chart.Init(m_Manager);
-            m_Chart.CreateTaskDelegate = delegate () { return new MyTask(m_Manager); };
-
-            // Initialize the Tasklist with our ProjectManager and Chart
-            m_TaskList.RowHeight = m_Chart.BarSpacing;
-            //dataTreeListView1.Scrollbars = System.Windows.Forms.RichTextBoxScrollBars.None;
-            GenerateListView(m_TaskList, m_Manager.HeaderList); // Lazy getHeaders() which needs changing later
-            //Generator.GenerateColumns(dataTreeListView1, typeof(MyTask), false);
-
+            // Build tasklist
             IEnumerable<Task> tasks = m_Manager.RootTasks;
             foreach (Task task in tasks)
             {
                 task.Children = m_Manager.DirectMembersOf(task);
-                if(task.Children.Count() != 0)
+                if (task.Children.Count() != 0)
                 {
                     task.CanExpand = true;
                 }
             }
-            m_TaskList.CanExpandGetter = delegate (object x) { return ((Task) x).CanExpand; };
-            m_TaskList.ChildrenGetter = delegate (object x) { return ((Task) x).Children; };
-            m_TaskList.AllowColumnReorder = true;
-            m_TaskList.CellEditActivation = ObjectListView.CellEditActivateMode.SingleClick;
-            //dataTreeListView1.sort
-
-            //dataTaskTreeView.RebuildColumns();
-            m_TaskList.SetObjects(tasks);
+            m_TaskList.Roots = tasks;
             m_TaskList.ExpandAll();
-            //m_Tasklist.Init(m_Manager, m_Chart);
-
+            m_TaskList.Refresh();
+            
             // GanttChart event listeners
             m_Chart.TaskMouseOver += new EventHandler<TaskMouseEventArgs>(m_Chart_TaskMouseOver);
             m_Chart.TaskMouseOut += new EventHandler<TaskMouseEventArgs>(m_Chart_TaskMouseOut);
@@ -171,8 +171,11 @@ namespace Edcore.GanttChart
             // Tasklist event listeners
             m_TaskList.Expanded += new EventHandler<TreeBranchExpandedEventArgs>(m_TaskList_Expanded);
             m_TaskList.Collapsed += new EventHandler<TreeBranchCollapsedEventArgs>(m_TaskList_Collapsed);
+            m_TaskList.CellEditValidating += new CellEditEventHandler(m_TaskList_CellEditValidating);
+            m_TaskList.CellEditFinishing += new CellEditEventHandler(m_TaskList_CellEditFinishing);
 
-            //m_Tasklist.TaskListMouseClick += new EventHandler<TaskListMouseEventArgs>(_mChart_TaskListMouseClick);
+            // Splitter event listeners
+            m_SplitContainer.SplitterMoved += new SplitterEventHandler(m_SplitContainer_SplitterMoved);
 
             // Set some tooltips to show the resources in each task
             //_mChart.SetToolTip(wake, string.Join(", ", _mManager.ResourcesOf(wake).Select(x => (x as MyResource).Name)));
@@ -199,24 +202,76 @@ namespace Edcore.GanttChart
             _InitExampleUI();
         }
 
+        private void m_SplitContainer_SplitterMoved(object sender, SplitterEventArgs e)
+        {
+            float maxSize = 0;
+            foreach(OLVColumn column in m_TaskList.AllColumns)
+            {
+                if(column.IsVisible)
+                {
+                    maxSize += column.Width;
+                }
+            }
+
+            if(e.X > maxSize)
+            {
+                m_SplitContainer.SplitterDistance = (int) maxSize + 20;
+            }
+        }
+
+        private void m_TaskList_CellEditFinishing(object sender, CellEditEventArgs e)
+        {
+            m_Chart.Invalidate();
+        }
+
+        private void m_TaskList_CellEditValidating(object sender, CellEditEventArgs e)
+        {
+            //int index = e.ListViewItem.Index;
+
+            //if (e.NewValue is string)
+            //{
+            //    if (!m_Manager.SetField((Task)e.RowObject, index, (string)e.NewValue))
+            //    {
+            //        MessageBox.Show("Unknown error", "Gantt Chart", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //        e.Cancel = true;
+            //    }
+            //}
+            //else if (e.NewValue is TimeSpan)
+            //{
+            //    if (!m_Manager.SetField((Task)e.RowObject, index, (TimeSpan)e.NewValue))
+            //    {
+            //        MessageBox.Show("Please try checking datetime input again", "Gantt Chart", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //        e.Cancel = true;
+            //    }
+            //}
+            //else if (e.NewValue is DateTime)
+            //{
+            //    if (!m_Manager.SetField((Task)e.RowObject, index, m_Manager.Start - (DateTime)e.NewValue))
+            //    {
+            //        MessageBox.Show("Please try checking datetime input again", "Gantt Chart", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //        e.Cancel = true;
+            //    }
+            //}
+        }
+
         private void m_TaskList_Collapsed(object sender, TreeBranchCollapsedEventArgs e)
         {
-            ((Task) e.Model).IsCollapsed = true;
+            ((Task)e.Model).IsCollapsed = true;
             m_Chart.Invalidate();
         }
 
         private void m_TaskList_Expanded(object sender, TreeBranchExpandedEventArgs e)
         {
-            ((Task) e.Model).IsCollapsed = false;
+            ((Task)e.Model).IsCollapsed = false;
             m_Chart.Invalidate();
         }
 
         private void m_Chart_TaskMouseDoubleClick(object sender, TaskMouseEventArgs e)
         {
-            if(e.Button == MouseButtons.Left)
+            if (e.Button == MouseButtons.Left)
             {
                 // this check happens BEFORE IsCollapsed is toggled by double click
-                if(!e.Task.IsCollapsed)
+                if (!e.Task.IsCollapsed)
                 {
                     m_TaskList.Collapse(e.Task);
                 }
@@ -235,7 +290,7 @@ namespace Edcore.GanttChart
 
         private void _mChart_Scroll(object sender, ScrollEventArgs e)
         {
-            if(e.ScrollOrientation == ScrollOrientation.VerticalScroll)
+            if (e.ScrollOrientation == ScrollOrientation.VerticalScroll)
             {
                 //float ratio = (float) dataTreeListView1.GetItemCount() * m_Chart.BarSpacing / m_Chart.Viewport.WorldHeight;
                 int delta = e.NewValue - e.OldValue;
@@ -249,18 +304,30 @@ namespace Edcore.GanttChart
         public void GenerateListView(ObjectListView objectListView, List<Header> headerList)
         {
             List<OLVColumn> columnsList = new List<OLVColumn>();
+
             foreach (Header header in headerList)
             {
                 int index = header.Index;
                 OLVColumn columnHeader = new OLVColumn();
 
-                columnHeader.Width = (int) header.Size;
+                columnHeader.DisplayIndex = index;
+                columnHeader.Width = (int)header.Size;
                 columnHeader.Text = header.Title;
-                columnHeader.AspectGetter = delegate (object x) { return m_Manager.GetData((Task)x, index); };
+                columnHeader.AspectGetter = delegate (object x) { return m_Manager.GetField((Task)x, index); };
+                columnHeader.AspectToStringConverter = delegate (object x){return m_Manager.FormatData(x); };
+                
+                columnHeader.IsVisible = !header.Hidden;
 
                 columnsList.Add(columnHeader);
                 objectListView.AllColumns.Add(columnHeader);
             }
+
+            // Add a 16 x 16 imagelist
+            //objectListView.SmallImageList = ;
+            //objectListView.Columns.Add(new SmallImageList); TODO
+            columnsList[2].AspectPutter = delegate (object x, object value) { m_Manager.SetStart((Task)x, (DateTime)value - m_Manager.Start); };
+            columnsList[3].AspectPutter = delegate (object x, object value) { m_Manager.SetEnd((Task)x, (DateTime)value - m_Manager.Start); };
+            columnsList[4].AspectPutter = delegate (object x, object value) { m_Manager.SetDuration((Task)x, TimeSpan.Parse((string)value)); };
 
             objectListView.Columns.AddRange(columnsList.Cast<ColumnHeader>().ToArray());
             objectListView.RebuildColumns();
@@ -695,7 +762,7 @@ namespace Edcore.GanttChart
             var task = m_Chart.SelectedTask;
 
             string fieldName = m_Manager.HeaderList[index].Title;
-            string data = m_Manager.GetData(task, index);
+            string data = m_Manager.GetFieldString(task, index);
 
             string input;
             if (_promptString("Change value of field [" + fieldName + "]:", "Edit task", data, "Task name cannot be empty", out input))
@@ -846,7 +913,7 @@ namespace Edcore.GanttChart
             if (_promptString("Change name of header [" + header + "] to:", "Edit header", header, "Task name cannot be empty", out input))
             {
                 m_Manager.HeaderList[index].Title = input;
-               // m_Tasklist.Invalidate(); // in case of change in text alignment
+                // m_Tasklist.Invalidate(); // in case of change in text alignment
             }
         }
 
@@ -855,7 +922,7 @@ namespace Edcore.GanttChart
             string input;
             if (_promptString("Enter a new custom field:", "Create custom field", "", "Task name cannot be empty", out input))
             {
-                m_Manager.AddCustomField(input, "string", 80f);
+                _registerCustomField(input, "string", 80f);
                 //m_Tasklist.RecalculateTasklist();
                 //m_Tasklist.Invalidate();
             }
@@ -866,9 +933,9 @@ namespace Edcore.GanttChart
             int input;
             if (_promptList("Select a field to delete", "Delete custom field", m_Manager.GetHeaderNames(), out input))
             {
-                if (input > 3)
+                if (input >= m_Manager.MainFieldCount)
                 {
-                    m_Manager.RemoveCustomField(input);
+                    _deregisterCustomField(input);
                     //m_Tasklist.RecalculateTasklist();
                     //m_Tasklist.Invalidate();
                 }
@@ -877,6 +944,37 @@ namespace Edcore.GanttChart
                     MessageBox.Show("Cannot delete important field", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
+        }
+        private void _registerCustomField(string fieldName, string type, float fieldSize)
+        {
+            m_Manager.AddCustomField(fieldName, type, fieldSize);
+
+            int index = m_Manager.FieldCount - 1;
+            Header header = m_Manager.HeaderList[index];
+
+            OLVColumn columnHeader = new OLVColumn();
+
+            columnHeader.DisplayIndex = index;
+            columnHeader.Width = (int)header.Size;
+            columnHeader.Text = header.Title;
+            columnHeader.AspectGetter = delegate (object x) { return m_Manager.GetField((Task)x, index); };
+            columnHeader.AspectToStringConverter = delegate (object x) { return m_Manager.FormatData(x); };
+            columnHeader.AspectPutter = delegate (object x, object value) 
+            {
+                m_Manager.SetField((Task)x, index, (string)value);
+            };
+            columnHeader.IsVisible = !header.Hidden;
+            
+            m_TaskList.AllColumns.Add(columnHeader);
+            m_TaskList.RebuildColumns();
+        }
+
+        private void _deregisterCustomField(int index)
+        {
+            m_Manager.RemoveCustomField(index);
+
+            m_TaskList.AllColumns.RemoveAt(index);
+            m_TaskList.RebuildColumns();
         }
 
         private bool _promptString(string question, string caption, string oldString, string errorMsg, out string result)

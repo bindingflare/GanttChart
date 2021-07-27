@@ -111,8 +111,8 @@ namespace Edcore.GanttChart
             this.editHeaderNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.resizeHeaderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.hideHeaderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.splitContainer2 = new System.Windows.Forms.SplitContainer();
-            this.m_TaskList = new BrightIdeasSoftware.DataTreeListView();
+            this.m_SplitContainer = new System.Windows.Forms.SplitContainer();
+            this.m_TaskList = new BrightIdeasSoftware.TreeListView();
             this.projectTitleLabel = new System.Windows.Forms.Label();
             this.m_Chart = new Edcore.GanttChart.GanttChart();
             this.menuStrip1.SuspendLayout();
@@ -135,10 +135,10 @@ namespace Edcore.GanttChart
             this._mPropertiesTab.SuspendLayout();
             this.quickButtonPanel.SuspendLayout();
             this.headerMenuStrip.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).BeginInit();
-            this.splitContainer2.Panel1.SuspendLayout();
-            this.splitContainer2.Panel2.SuspendLayout();
-            this.splitContainer2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.m_SplitContainer)).BeginInit();
+            this.m_SplitContainer.Panel1.SuspendLayout();
+            this.m_SplitContainer.Panel2.SuspendLayout();
+            this.m_SplitContainer.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.m_TaskList)).BeginInit();
             this.SuspendLayout();
             // 
@@ -153,7 +153,7 @@ namespace Edcore.GanttChart
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(1284, 24);
-            this.menuStrip1.TabIndex = 6;
+            this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
             // fileToolStripMenuItem
@@ -404,21 +404,21 @@ namespace Edcore.GanttChart
             // taskListToolStripMenuItem
             // 
             this.taskListToolStripMenuItem.Name = "taskListToolStripMenuItem";
-            this.taskListToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.taskListToolStripMenuItem.Size = new System.Drawing.Size(123, 22);
             this.taskListToolStripMenuItem.Text = "Task List";
             this.taskListToolStripMenuItem.Click += new System.EventHandler(this.taskListToolStripMenuItem_Click);
             // 
             // taskTreeToolStripMenuItem
             // 
             this.taskTreeToolStripMenuItem.Name = "taskTreeToolStripMenuItem";
-            this.taskTreeToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.taskTreeToolStripMenuItem.Size = new System.Drawing.Size(123, 22);
             this.taskTreeToolStripMenuItem.Text = "Task Tree";
             this.taskTreeToolStripMenuItem.Click += new System.EventHandler(this.taskTreeToolStripMenuItem_Click);
             // 
             // timelineToolStripMenuItem
             // 
             this.timelineToolStripMenuItem.Name = "timelineToolStripMenuItem";
-            this.timelineToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.timelineToolStripMenuItem.Size = new System.Drawing.Size(123, 22);
             this.timelineToolStripMenuItem.Text = "Timeline";
             this.timelineToolStripMenuItem.Click += new System.EventHandler(this.timelineToolStripMenuItem_Click);
             // 
@@ -450,14 +450,14 @@ namespace Edcore.GanttChart
             this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mnuHelpAbout});
             this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
-            this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
-            this.helpToolStripMenuItem.Text = "Help";
+            this.helpToolStripMenuItem.Size = new System.Drawing.Size(52, 20);
+            this.helpToolStripMenuItem.Text = "About";
             // 
             // mnuHelpAbout
             // 
             this.mnuHelpAbout.Name = "mnuHelpAbout";
-            this.mnuHelpAbout.Size = new System.Drawing.Size(173, 22);
-            this.mnuHelpAbout.Text = "About Gantt Chart";
+            this.mnuHelpAbout.Size = new System.Drawing.Size(136, 22);
+            this.mnuHelpAbout.Text = "Gantt Chart";
             this.mnuHelpAbout.Click += new System.EventHandler(this.mnuHelpAbout_Click);
             // 
             // statusStrip1
@@ -589,7 +589,7 @@ namespace Edcore.GanttChart
             this._mTaskGridView.Location = new System.Drawing.Point(0, 0);
             this._mTaskGridView.Name = "_mTaskGridView";
             this._mTaskGridView.Size = new System.Drawing.Size(270, 537);
-            this._mTaskGridView.TabIndex = 0;
+            this._mTaskGridView.TabIndex = 6;
             this._mTaskGridView.SelectionChanged += new System.EventHandler(this._mTaskGridView_SelectionChanged);
             // 
             // _mTaskTreeTab
@@ -690,10 +690,10 @@ namespace Edcore.GanttChart
             this._mResourceGrid.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this._mResourceGrid.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.colName});
-            this._mResourceGrid.Location = new System.Drawing.Point(3, 247);
+            this._mResourceGrid.Location = new System.Drawing.Point(3, 239);
             this._mResourceGrid.Name = "_mResourceGrid";
             this._mResourceGrid.Size = new System.Drawing.Size(226, 164);
-            this._mResourceGrid.TabIndex = 0;
+            this._mResourceGrid.TabIndex = 4;
             this._mResourceGrid.UseCompatibleStateImageBehavior = false;
             this._mResourceGrid.View = System.Windows.Forms.View.List;
             // 
@@ -740,7 +740,7 @@ namespace Edcore.GanttChart
             // 
             this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(3, 232);
+            this.label2.Location = new System.Drawing.Point(3, 224);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(76, 15);
             this.label2.TabIndex = 1;
@@ -753,8 +753,8 @@ namespace Edcore.GanttChart
             this._mTaskGrid.LineColor = System.Drawing.SystemColors.ControlDark;
             this._mTaskGrid.Location = new System.Drawing.Point(3, 3);
             this._mTaskGrid.Name = "_mTaskGrid";
-            this._mTaskGrid.Size = new System.Drawing.Size(226, 228);
-            this._mTaskGrid.TabIndex = 0;
+            this._mTaskGrid.Size = new System.Drawing.Size(226, 220);
+            this._mTaskGrid.TabIndex = 3;
             // 
             // quickButtonPanel
             // 
@@ -777,7 +777,7 @@ namespace Edcore.GanttChart
             this.textBox1.MaxLength = 30;
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(173, 23);
-            this.textBox1.TabIndex = 2;
+            this.textBox1.TabIndex = 0;
             this.textBox1.Text = "Search...";
             this.textBox1.WordWrap = false;
             // 
@@ -832,23 +832,23 @@ namespace Edcore.GanttChart
             // 
             // splitContainer2
             // 
-            this.splitContainer2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.m_SplitContainer.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.splitContainer2.Location = new System.Drawing.Point(0, 24);
-            this.splitContainer2.Name = "splitContainer2";
+            this.m_SplitContainer.Location = new System.Drawing.Point(0, 24);
+            this.m_SplitContainer.Name = "splitContainer2";
             // 
             // splitContainer2.Panel1
             // 
-            this.splitContainer2.Panel1.Controls.Add(this.m_TaskList);
-            this.splitContainer2.Panel1.Controls.Add(this.projectTitleLabel);
+            this.m_SplitContainer.Panel1.Controls.Add(this.m_TaskList);
+            this.m_SplitContainer.Panel1.Controls.Add(this.projectTitleLabel);
             // 
             // splitContainer2.Panel2
             // 
-            this.splitContainer2.Panel2.Controls.Add(this.m_Chart);
-            this.splitContainer2.Size = new System.Drawing.Size(1284, 680);
-            this.splitContainer2.SplitterDistance = 428;
-            this.splitContainer2.TabIndex = 14;
+            this.m_SplitContainer.Panel2.Controls.Add(this.m_Chart);
+            this.m_SplitContainer.Size = new System.Drawing.Size(1284, 680);
+            this.m_SplitContainer.SplitterDistance = 428;
+            this.m_SplitContainer.TabIndex = 14;
             // 
             // m_TaskList
             // 
@@ -860,17 +860,15 @@ namespace Edcore.GanttChart
             this.m_TaskList.CellEditTabChangesRows = true;
             this.m_TaskList.CellEditUseWholeCell = false;
             this.m_TaskList.CellPadding = new System.Drawing.Rectangle(0, 0, 0, 0);
-            this.m_TaskList.DataSource = null;
             this.m_TaskList.EmptyListMsg = "(List is empty)";
             this.m_TaskList.EmptyListMsgFont = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.m_TaskList.Location = new System.Drawing.Point(0, 33);
             this.m_TaskList.Name = "m_TaskList";
-            this.m_TaskList.RootKeyValueString = "";
             this.m_TaskList.SelectedBackColor = System.Drawing.SystemColors.HighlightText;
             this.m_TaskList.SelectedColumnTint = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(180)))), ((int)(((byte)(180)))), ((int)(((byte)(180)))));
             this.m_TaskList.ShowGroups = false;
             this.m_TaskList.Size = new System.Drawing.Size(428, 647);
-            this.m_TaskList.TabIndex = 2;
+            this.m_TaskList.TabIndex = 1;
             this.m_TaskList.UseAlternatingBackColors = true;
             this.m_TaskList.UseCompatibleStateImageBehavior = false;
             this.m_TaskList.View = System.Windows.Forms.View.Details;
@@ -896,7 +894,7 @@ namespace Edcore.GanttChart
             this.m_Chart.Name = "m_Chart";
             this.m_Chart.Padding = new System.Windows.Forms.Padding(5);
             this.m_Chart.Size = new System.Drawing.Size(852, 680);
-            this.m_Chart.TabIndex = 4;
+            this.m_Chart.TabIndex = 2;
             // 
             // NewUI
             // 
@@ -908,7 +906,7 @@ namespace Edcore.GanttChart
             this.Controls.Add(this.optionsPanel);
             this.Controls.Add(this.menuStrip1);
             this.Controls.Add(this.statusStrip1);
-            this.Controls.Add(this.splitContainer2);
+            this.Controls.Add(this.m_SplitContainer);
             this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "NewUI";
@@ -938,10 +936,10 @@ namespace Edcore.GanttChart
             this.quickButtonPanel.ResumeLayout(false);
             this.quickButtonPanel.PerformLayout();
             this.headerMenuStrip.ResumeLayout(false);
-            this.splitContainer2.Panel1.ResumeLayout(false);
-            this.splitContainer2.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
-            this.splitContainer2.ResumeLayout(false);
+            this.m_SplitContainer.Panel1.ResumeLayout(false);
+            this.m_SplitContainer.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.m_SplitContainer)).EndInit();
+            this.m_SplitContainer.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.m_TaskList)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -1029,9 +1027,9 @@ namespace Edcore.GanttChart
         private System.Windows.Forms.ToolStripMenuItem createCustomFieldToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem deleteCustomFieldToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
-        private System.Windows.Forms.SplitContainer splitContainer2;
+        private System.Windows.Forms.SplitContainer m_SplitContainer;
         private System.Windows.Forms.Label projectTitleLabel;
-        private BrightIdeasSoftware.DataTreeListView m_TaskList;
+        private BrightIdeasSoftware.TreeListView m_TaskList;
         private System.Windows.Forms.TextBox textBox1;
     }
 }
