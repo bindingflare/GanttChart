@@ -1116,6 +1116,11 @@ namespace Edcore.GanttChart
             }
         }
 
+        public List<Header> getHeaders()
+        {
+            return m_HeaderList;
+        }
+
         /// <summary>
         /// Removes a user-defined field of a task.
         /// </summary>

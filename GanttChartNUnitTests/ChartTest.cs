@@ -38,7 +38,7 @@ namespace GanttChartNUnitTests
             form.Controls.Add(chart);
 
             // init chart
-            var manager = new ProjectManager<Task, object>();
+            var manager = new ProjectManager<Task, object>("Testing");
             chart.Init(manager);
         }
 
@@ -49,7 +49,7 @@ namespace GanttChartNUnitTests
         public void DeferredAddChartToForm()
         {
             GanttChart chart = new GanttChart();
-            var manager = new ProjectManager<Task, object>();
+            var manager = new ProjectManager<Task, object>("Testing");
             chart.Init(manager);
 
             // deferred add to form

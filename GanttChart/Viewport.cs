@@ -11,7 +11,7 @@ namespace Edcore.GanttChart
     /// <summary>
     /// IViewport moves in world coordinate and projects models to device coordinate space
     /// </summary>
-    interface IViewport
+    public interface IViewport
     {
         /// <summary>
         /// Get the projection matrix to transform world coordinates to device coordinates
@@ -178,7 +178,7 @@ namespace Edcore.GanttChart
     /// <summary>
     /// An IViewport that is placed over a world coordinate system and provides methods to transform between world and view coordinates
     /// </summary>
-    class ControlViewport : IViewport
+    public class ControlViewport : IViewport
     {
         /// <summary>
         /// Construct a Viewport
@@ -400,16 +400,6 @@ namespace Edcore.GanttChart
         {
             _mMatrix = new Matrix();
             _mMatrix.Translate(-X, -Y);
-        }
-
-        public VScrollBar VerticalScroll()
-        {
-            return _mvScroll;
-        }
-
-        internal void RegisterScrollEvent(object ganttChart_OnScroll)
-        {
-            throw new NotImplementedException();
         }
 
         Control _mDevice;

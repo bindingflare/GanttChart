@@ -82,6 +82,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Design" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -129,6 +130,10 @@
     <ProjectReference Include="..\GanttChart\GanttChartCore.csproj">
       <Project>{f98f97d5-4f29-4531-ad05-d90f8e84c9aa}</Project>
       <Name>GanttChartCore</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ObjectListView\ObjectListView2012.csproj">
+      <Project>{18FEDA0C-D147-4286-B39A-01204808106A}</Project>
+      <Name>ObjectListView2012</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

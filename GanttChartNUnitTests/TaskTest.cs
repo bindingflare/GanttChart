@@ -13,7 +13,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void SetTaskParameters()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var one = new Task();
             manager.Add(one);
 
@@ -45,7 +45,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void RelateBeforePrecedentEndsLate()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var one = new Task() { Name = "one" };
             var two = new Task() { Name = "two" };
             manager.Add(one);
@@ -68,7 +68,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void AdjustDependantScheduleOnRelate()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var one = new Task() { Name = "one" };
             var two = new Task() { Name = "two" };
             manager.Add(one);
@@ -95,7 +95,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void PrecendentPushingDependantLater()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var one = new Task() { Name = "one" };
             var two = new Task() { Name = "two" };
             manager.Add(one);
@@ -127,7 +127,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void AdjustGroupScheduleOnMemberScheduleChange()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var group = new Task() { Name = "group" };
             var one = new Task() { Name = "one" };
             var two = new Task() { Name = "two" };
@@ -165,7 +165,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void CannotSetCompleteOnGroup()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var group = new Task() { Name = "group" };
             var member = new Task() { Name = "member" };
             manager.Add(group);
@@ -192,7 +192,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void AdjustGroupCompleteOnMemberCompleteChange()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var group = new Task() { Name = "group" };
             var member = new Task() { Name = "member" };
             manager.Add(group);
@@ -212,7 +212,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void AdjustGroupScheduleOnGroup()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var group = new Task();
             var one = new Task();
             manager.Add(group);
@@ -239,7 +239,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void DurationCannotLessThanZero()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var one = new Task();
             manager.Add(one);
 
@@ -260,7 +260,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void CompleteMustBetweenZeroAndOne()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var one = new Task();
             manager.Add(one);
 
@@ -283,7 +283,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void DependantRescheduledStartEarlierThanPrecedentEnd()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var one = new Task();
             var two = new Task();
             manager.Add(one);
@@ -312,7 +312,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void CriticalPath()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var one = new Task();
             var two = new Task();
             var three = new Task();
@@ -394,7 +394,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void TaskStartLessThanEnd()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var task = new Task();
             manager.Add(task);
 
@@ -412,7 +412,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void SetSplitSchedule()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var split = new Task();
             var part1 = new Task();
             var part2 = new Task();
@@ -449,7 +449,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void MovePartLaterStart()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var split = new Task();
             var part1 = new Task();
             var part2 = new Task();
@@ -499,7 +499,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void MovePartEarlierStart()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var split = new Task();
             var part1 = new Task();
             var part2 = new Task();
@@ -551,7 +551,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void MovePartEarlierOverlap()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var split = new Task();
             var part1 = new Task();
             var part2 = new Task();
@@ -621,7 +621,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void MovePartLaterOverlap()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var split = new Task();
             var part1 = new Task();
             var part2 = new Task();
@@ -671,7 +671,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void MovePartLaterThanDependantStart()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var split = new Task();
             var part1 = new Task();
             var part2 = new Task();
@@ -706,7 +706,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void SplitPartWithDependantAndAdjustDependantStart()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var split = new Task();
             var part1 = new Task();
             var part2 = new Task();
@@ -739,7 +739,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void SetSplitTaskStartMaintainPartsRelativeSchedule()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var split = new Task();
             var part1 = new Task();
             var part2 = new Task();
@@ -790,7 +790,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void SetSplitTaskEndLastTaskMinimun1UnitTime()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var split = new Task();
             var part1 = new Task();
             var part2 = new Task();
@@ -847,7 +847,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void DeleteResourceOnDeleteTask()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var task1 = new Task();
             var task2 = new Task();
             var r1 = new Task();
@@ -881,7 +881,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void TransferResourceToSplitTaskOnMerge_ByDeleteInThisCase()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var split = new Task();
             var part1 = new Task();
             var part2 = new Task();
@@ -914,7 +914,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void DeletePartCausingMerge()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var split = new Task();
             var part1 = new Task();
             var part2 = new Task();
@@ -936,7 +936,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void DeleteResourcesOnDeleteSplitTask()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var split = new Task();
             var part1 = new Task();
             var part2 = new Task();
@@ -977,7 +977,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void DeletePartsOnDeleteSplitTask()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var split = new Task();
             var part1 = new Task();
             var part2 = new Task();
@@ -1017,7 +1017,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void SplitExistingSplitTaskNoEffect()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var split = new Task();
             var part1 = new Task();
             var part2 = new Task();
@@ -1057,7 +1057,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void CannotStartPartBeforeSplitTaskPrecedentStart()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var split = new Task();
             var part1 = new Task();
             var part2 = new Task();
@@ -1091,7 +1091,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void SetPartCompleteUpdatesSplitTaskAndGroup()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var split = new Task() { Name = "split" };
             var part1 = new Task() { Name = "part1" };
             var part2 = new Task() { Name = "part2" };

@@ -34,6 +34,9 @@
     <DocumentationFile>bin\Release\GanttChart.XML</DocumentationFile>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -46,6 +49,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="obj\Debug\TemporaryGeneratedFile_036C0B5B-1481-4323-8D20-8F5ADCB23D92.cs" />
+    <Compile Include="obj\Debug\TemporaryGeneratedFile_5937a670-0e60-4077-877b-f7221da3dda1.cs" />
+    <Compile Include="obj\Debug\TemporaryGeneratedFile_E7A71F73-0F8D-4B9B-B56E-8E70B10BC5D3.cs" />
     <Compile Include="TaskListView.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -56,15 +62,46 @@
     <Compile Include="GanttChart.Designer.cs">
       <DependentUpon>GanttChart.cs</DependentUpon>
     </Compile>
+    <Compile Include="TaskTreeView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="Viewport.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="GanttChart.resx">
       <DependentUpon>GanttChart.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="obj\Debug\Edcore.GanttChart.GDIExtention.resources" />
+    <EmbeddedResource Include="obj\Debug\Edcore.GanttChart.TaskListView.resources" />
     <EmbeddedResource Include="TaskListView.resx">
       <DependentUpon>TaskListView.cs</DependentUpon>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="bin\Debug\GanttChart.dll" />
+    <Content Include="bin\Debug\GanttChart.pdb" />
+    <Content Include="obj\Debug\GanttChart.csproj.FileListAbsolute.txt" />
+    <Content Include="obj\Debug\GanttChart.dll" />
+    <Content Include="obj\Debug\GanttChart.pdb" />
+    <Content Include="obj\Debug\GanttChartCore.csproj.FileListAbsolute.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="obj\Debug\DesignTimeResolveAssemblyReferences.cache" />
+    <None Include="obj\Debug\DesignTimeResolveAssemblyReferencesInput.cache" />
+    <None Include="obj\Debug\GanttChart.csproj.GenerateResource.Cache" />
+    <None Include="obj\Debug\GanttChart.csprojResolveAssemblyReference.cache" />
+    <None Include="obj\Debug\GanttChartCore.csproj.GenerateResource.Cache" />
+    <None Include="obj\Debug\GanttChartCore.csprojResolveAssemblyReference.cache" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="bin\Release\" />
+    <Folder Include="obj\Debug\TempPE\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ObjectListView\ObjectListView2012.csproj">
+      <Project>{18FEDA0C-D147-4286-B39A-01204808106A}</Project>
+      <Name>ObjectListView2012</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

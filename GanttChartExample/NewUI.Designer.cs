@@ -112,9 +112,11 @@ namespace Edcore.GanttChart
             this.headerOrderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.resizeHeaderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.hideHeaderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.m_Chart = new Edcore.GanttChart.GanttChart();
-            this.m_Tasklist = new Edcore.GanttChart.TaskListView();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
+            this.dataTreeListView1 = new BrightIdeasSoftware.DataTreeListView();
+            this.projectTitleLabel = new System.Windows.Forms.Label();
+            this.m_Chart = new Edcore.GanttChart.GanttChart();
+            this.textBox1 = new System.Windows.Forms.TextBox();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.taskMenuStrip.SuspendLayout();
@@ -139,6 +141,7 @@ namespace Edcore.GanttChart
             this.splitContainer2.Panel1.SuspendLayout();
             this.splitContainer2.Panel2.SuspendLayout();
             this.splitContainer2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dataTreeListView1)).BeginInit();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -697,7 +700,7 @@ namespace Edcore.GanttChart
             this._mResourceGrid.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this._mResourceGrid.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.colName});
-            this._mResourceGrid.Location = new System.Drawing.Point(3, 281);
+            this._mResourceGrid.Location = new System.Drawing.Point(3, 247);
             this._mResourceGrid.Name = "_mResourceGrid";
             this._mResourceGrid.Size = new System.Drawing.Size(226, 164);
             this._mResourceGrid.TabIndex = 0;
@@ -747,7 +750,7 @@ namespace Edcore.GanttChart
             // 
             this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(3, 266);
+            this.label2.Location = new System.Drawing.Point(3, 232);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(76, 15);
             this.label2.TabIndex = 1;
@@ -760,23 +763,24 @@ namespace Edcore.GanttChart
             this._mTaskGrid.LineColor = System.Drawing.SystemColors.ControlDark;
             this._mTaskGrid.Location = new System.Drawing.Point(3, 3);
             this._mTaskGrid.Name = "_mTaskGrid";
-            this._mTaskGrid.Size = new System.Drawing.Size(226, 262);
+            this._mTaskGrid.Size = new System.Drawing.Size(226, 228);
             this._mTaskGrid.TabIndex = 0;
             // 
             // quickButtonPanel
             // 
             this.quickButtonPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.quickButtonPanel.BackColor = System.Drawing.SystemColors.Window;
+            this.quickButtonPanel.Controls.Add(this.textBox1);
             this.quickButtonPanel.Controls.Add(this._mRemoveButton);
             this.quickButtonPanel.Controls.Add(this._mAddButton);
-            this.quickButtonPanel.Location = new System.Drawing.Point(1116, 0);
+            this.quickButtonPanel.Location = new System.Drawing.Point(927, 0);
             this.quickButtonPanel.Name = "quickButtonPanel";
-            this.quickButtonPanel.Size = new System.Drawing.Size(168, 24);
+            this.quickButtonPanel.Size = new System.Drawing.Size(357, 24);
             this.quickButtonPanel.TabIndex = 10;
             // 
             // _mRemoveButton
             // 
-            this._mRemoveButton.Location = new System.Drawing.Point(84, 1);
+            this._mRemoveButton.Location = new System.Drawing.Point(272, 0);
             this._mRemoveButton.Name = "_mRemoveButton";
             this._mRemoveButton.Size = new System.Drawing.Size(75, 23);
             this._mRemoveButton.TabIndex = 1;
@@ -786,7 +790,7 @@ namespace Edcore.GanttChart
             // 
             // _mAddButton
             // 
-            this._mAddButton.Location = new System.Drawing.Point(3, 1);
+            this._mAddButton.Location = new System.Drawing.Point(191, 0);
             this._mAddButton.Name = "_mAddButton";
             this._mAddButton.Size = new System.Drawing.Size(75, 23);
             this._mAddButton.TabIndex = 0;
@@ -832,41 +836,86 @@ namespace Edcore.GanttChart
             this.hideHeaderToolStripMenuItem.Text = "Hide";
             this.hideHeaderToolStripMenuItem.Click += new System.EventHandler(this.hideHeaderToolStripMenuItem_Click);
             // 
-            // m_Chart
-            // 
-            this.m_Chart.AllowTaskDragDrop = false;
-            this.m_Chart.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.m_Chart.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.m_Chart.Location = new System.Drawing.Point(0, 0);
-            this.m_Chart.Margin = new System.Windows.Forms.Padding(0);
-            this.m_Chart.Name = "m_Chart";
-            this.m_Chart.Padding = new System.Windows.Forms.Padding(5);
-            this.m_Chart.Size = new System.Drawing.Size(852, 705);
-            this.m_Chart.TabIndex = 4;
-            // 
-            // m_Tasklist
-            // 
-            this.m_Tasklist.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.m_Tasklist.Location = new System.Drawing.Point(0, 0);
-            this.m_Tasklist.Name = "m_Tasklist";
-            this.m_Tasklist.Size = new System.Drawing.Size(428, 705);
-            this.m_Tasklist.TabIndex = 13;
-            // 
             // splitContainer2
             // 
+            this.splitContainer2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.splitContainer2.Location = new System.Drawing.Point(0, 24);
             this.splitContainer2.Name = "splitContainer2";
             // 
             // splitContainer2.Panel1
             // 
-            this.splitContainer2.Panel1.Controls.Add(this.m_Tasklist);
+            this.splitContainer2.Panel1.Controls.Add(this.dataTreeListView1);
+            this.splitContainer2.Panel1.Controls.Add(this.projectTitleLabel);
             // 
             // splitContainer2.Panel2
             // 
             this.splitContainer2.Panel2.Controls.Add(this.m_Chart);
-            this.splitContainer2.Size = new System.Drawing.Size(1284, 705);
+            this.splitContainer2.Size = new System.Drawing.Size(1284, 680);
             this.splitContainer2.SplitterDistance = 428;
             this.splitContainer2.TabIndex = 14;
+            // 
+            // dataTreeListView1
+            // 
+            this.dataTreeListView1.AlternateRowBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
+            this.dataTreeListView1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.dataTreeListView1.CellEditActivation = BrightIdeasSoftware.ObjectListView.CellEditActivateMode.SingleClick;
+            this.dataTreeListView1.CellEditTabChangesRows = true;
+            this.dataTreeListView1.CellEditUseWholeCell = false;
+            this.dataTreeListView1.CellPadding = new System.Drawing.Rectangle(0, 0, 0, 0);
+            this.dataTreeListView1.DataSource = null;
+            this.dataTreeListView1.EmptyListMsg = "(List is empty)";
+            this.dataTreeListView1.EmptyListMsgFont = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.dataTreeListView1.Location = new System.Drawing.Point(0, 33);
+            this.dataTreeListView1.Name = "dataTreeListView1";
+            this.dataTreeListView1.RootKeyValueString = "";
+            this.dataTreeListView1.SelectedBackColor = System.Drawing.SystemColors.HighlightText;
+            this.dataTreeListView1.SelectedColumnTint = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(180)))), ((int)(((byte)(180)))), ((int)(((byte)(180)))));
+            this.dataTreeListView1.ShowGroups = false;
+            this.dataTreeListView1.Size = new System.Drawing.Size(428, 647);
+            this.dataTreeListView1.TabIndex = 2;
+            this.dataTreeListView1.UseAlternatingBackColors = true;
+            this.dataTreeListView1.UseCompatibleStateImageBehavior = false;
+            this.dataTreeListView1.View = System.Windows.Forms.View.Details;
+            this.dataTreeListView1.VirtualMode = true;
+            // 
+            // projectTitleLabel
+            // 
+            this.projectTitleLabel.Dock = System.Windows.Forms.DockStyle.Top;
+            this.projectTitleLabel.Location = new System.Drawing.Point(0, 0);
+            this.projectTitleLabel.Name = "projectTitleLabel";
+            this.projectTitleLabel.Size = new System.Drawing.Size(428, 32);
+            this.projectTitleLabel.TabIndex = 1;
+            this.projectTitleLabel.Text = "{project_title}";
+            // 
+            // m_Chart
+            // 
+            this.m_Chart.AllowTaskDragDrop = false;
+            this.m_Chart.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.m_Chart.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.m_Chart.HeaderTwoHeight = 26;
+            this.m_Chart.Location = new System.Drawing.Point(0, 0);
+            this.m_Chart.Margin = new System.Windows.Forms.Padding(0);
+            this.m_Chart.Name = "m_Chart";
+            this.m_Chart.Padding = new System.Windows.Forms.Padding(5);
+            this.m_Chart.Size = new System.Drawing.Size(852, 680);
+            this.m_Chart.TabIndex = 4;
+            // 
+            // textBox1
+            // 
+            this.textBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox1.Location = new System.Drawing.Point(0, 0);
+            this.textBox1.MaxLength = 30;
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(173, 23);
+            this.textBox1.TabIndex = 2;
+            this.textBox1.Text = "Search...";
+            this.textBox1.WordWrap = false;
             // 
             // NewUI
             // 
@@ -906,11 +955,13 @@ namespace Edcore.GanttChart
             this._mPropertiesTab.ResumeLayout(false);
             this._mPropertiesTab.PerformLayout();
             this.quickButtonPanel.ResumeLayout(false);
+            this.quickButtonPanel.PerformLayout();
             this.headerMenuStrip.ResumeLayout(false);
             this.splitContainer2.Panel1.ResumeLayout(false);
             this.splitContainer2.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
             this.splitContainer2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.dataTreeListView1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -953,7 +1004,6 @@ namespace Edcore.GanttChart
         private System.Windows.Forms.ToolStripMenuItem mnuViewHours;
         private System.Windows.Forms.ContextMenuStrip taskMenuStrip;
         private GanttChart m_Chart;
-        private TaskListView m_Tasklist;
         private System.Windows.Forms.TabControl taskTabControl;
         private System.Windows.Forms.TabPage taskListTab;
         private System.Windows.Forms.DataGridView _mTaskGridView;
@@ -1001,6 +1051,9 @@ namespace Edcore.GanttChart
         private System.Windows.Forms.ToolStripMenuItem headerOrderToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem showHiddenFieldToolStripMenuItem;
         private System.Windows.Forms.SplitContainer splitContainer2;
+        private System.Windows.Forms.Label projectTitleLabel;
+        private BrightIdeasSoftware.DataTreeListView dataTreeListView1;
+        private System.Windows.Forms.TextBox textBox1;
     }
 }
 

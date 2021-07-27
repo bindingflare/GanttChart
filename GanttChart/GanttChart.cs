@@ -61,8 +61,8 @@ namespace Edcore.GanttChart
             MinorWidth = 20;
             TimeResolution = TimeResolution.Day;
             this.DoubleBuffered = true;
-            m_Viewport = new ControlViewport(this) { WheelDelta = BarSpacing };
-            m_Viewport.RegisterScrollEvent(GanttChart_OnScroll);
+            Viewport = new ControlViewport(this) { WheelDelta = BarSpacing };
+            Viewport.RegisterScrollEvent(GanttChart_OnScroll);
             AllowTaskDragDrop = true;
             ShowRelations = true;
             ShowSlack = false;
@@ -287,8 +287,6 @@ namespace Edcore.GanttChart
         /// </summary>
         public event EventHandler<TimelinePaintEventArgs> PaintTimeline = null;
 
-        public event EventHandler<ScrollEventArgs> ScrollEvent = null;
-
         /// <summary>
         /// Get the line number of the specified task
         /// </summary>
@@ -328,17 +326,6 @@ namespace Edcore.GanttChart
                 return true;
             }
             return false;
-        }
-
-        /// <summary>
-        /// Get the Y coordinate of the Viewport
-        /// </summary>
-        /// <param name="row"></param>
-        /// <param name="task"></param>
-        /// <returns></returns>
-        public float ViewportY()
-        {
-            return m_Viewport.Y;
         }
 
         /// <summary>
@@ -490,7 +477,7 @@ namespace Edcore.GanttChart
         public void ScrollTo(DateTime datetime)
         {
             TimeSpan span = datetime - m_Project.Start;
-            m_Viewport.X = GetSpan(span);
+            Viewport.X = GetSpan(span);
         }
 
         /// <summary>
@@ -502,8 +489,8 @@ namespace Edcore.GanttChart
             if (_mChartTaskRects.ContainsKey(task))
             {
                 var rect = _mChartTaskRects[task];
-                m_Viewport.X = rect.Left - this.MinorWidth;
-                m_Viewport.Y = rect.Top - this.HeaderOneHeight - this.HeaderTwoHeight;
+                Viewport.X = rect.Left - this.MinorWidth;
+                Viewport.Y = rect.Top - this.HeaderOneHeight - this.HeaderTwoHeight;
             }
         }
 
@@ -522,7 +509,7 @@ namespace Edcore.GanttChart
         /// <param name="graphics"></param>
         public void EndBillboardMode(Graphics graphics)
         {
-            graphics.Transform = m_Viewport.Projection;
+            graphics.Transform = Viewport.Projection;
         }
 
         /// <summary>
@@ -596,7 +583,7 @@ namespace Edcore.GanttChart
         protected override void OnMouseMove(MouseEventArgs e)
         {
             var task = _GetTaskUnderMouse(e.Location);
-            var deviceLocation = m_Viewport.DeviceToWorldCoord(e.Location);
+            var deviceLocation = Viewport.DeviceToWorldCoord(e.Location);
 
 
             // Check if mouse is in task list
@@ -642,15 +629,15 @@ namespace Edcore.GanttChart
                 this.Cursor = Cursors.SizeAll;
                 float distanceY = e.Y - _mPanViewLastLocation.Y;
 
-                m_Viewport.X -= e.X - _mPanViewLastLocation.X;
-                m_Viewport.Y -= distanceY;
+                Viewport.X -= e.X - _mPanViewLastLocation.X;
+                Viewport.Y -= distanceY;
                 _mPanViewLastLocation = e.Location;
 
-                // Call scroll event
-                if(distanceY < 0)
-                    OnScroll(new ScrollEventArgs(ScrollEventType.SmallDecrement, (int) distanceY, ScrollOrientation.VerticalScroll));
-                else
-                    OnScroll(new ScrollEventArgs(ScrollEventType.SmallIncrement, (int) distanceY, ScrollOrientation.VerticalScroll));
+                //// Call scroll event
+                //if(distanceY < 0)
+                //    OnScroll(new ScrollEventArgs(ScrollEventType.SmallDecrement, (int) distanceY, ScrollOrientation.VerticalScroll));
+                //else
+                //    OnScroll(new ScrollEventArgs(ScrollEventType.SmallIncrement, (int) distanceY, ScrollOrientation.VerticalScroll));
             }
 
             base.OnMouseMove(e);
@@ -662,7 +649,7 @@ namespace Edcore.GanttChart
         /// <param name="e"></param>
         protected override void OnMouseClick(MouseEventArgs e)
         {
-            var deviceLocation = m_Viewport.DeviceToWorldCoord(e.Location);
+            var deviceLocation = Viewport.DeviceToWorldCoord(e.Location);
 
             var task = _GetTaskUnderMouse(e.Location);
 
@@ -700,7 +687,7 @@ namespace Edcore.GanttChart
 
                 if (_mDraggedTask != null)
                 {
-                    PointF point = m_Viewport.DeviceToWorldCoord(e.Location);
+                    PointF point = Viewport.DeviceToWorldCoord(e.Location);
                     RectangleF rect = _mChartTaskHitRects[_mDraggedTask];
                     isNearEdge = _isWithinHitBoxEdge(rect, point, 10);
                     isDragStart = rect.Left + 10 > point.X;
@@ -742,7 +729,7 @@ namespace Edcore.GanttChart
         /// <param name="e"></param>
         protected override void OnMouseDoubleClick(MouseEventArgs e)
         {
-            var deviceLocation = m_Viewport.DeviceToWorldCoord(e.Location);
+            var deviceLocation = Viewport.DeviceToWorldCoord(e.Location);
             
             var task = _GetTaskUnderMouse(e.Location);
             if (task != null)
@@ -776,7 +763,7 @@ namespace Edcore.GanttChart
             if (m_Project.IsPart(e.Task)) task = m_Project.SplitTaskOf(task);
             if (_mTaskToolTip.ContainsKey(task))
             {
-                _mOverlay.ShowToolTip(m_Viewport.DeviceToWorldCoord(e.Location), _mTaskToolTip[task]);
+                _mOverlay.ShowToolTip(Viewport.DeviceToWorldCoord(e.Location), _mTaskToolTip[task]);
                 this.Invalidate();
             }
         }
@@ -998,7 +985,7 @@ namespace Edcore.GanttChart
             }
             else if (e.Button == System.Windows.Forms.MouseButtons.Right)
             {
-                TimeSpan duration = GetSpan(m_Viewport.DeviceToWorldCoord(e.Location).X - e.Rectangle.Left);
+                TimeSpan duration = GetSpan(Viewport.DeviceToWorldCoord(e.Location).X - e.Rectangle.Left);
                 if (m_Project.IsPart(e.Task)) m_Project.Split(e.Task, CreateTaskDelegate(), duration);
                 else m_Project.Split(e.Task, CreateTaskDelegate(), CreateTaskDelegate(), duration);
             }
@@ -1115,7 +1102,7 @@ namespace Edcore.GanttChart
 
         private Task _GetTaskUnderMouse(Point mouse)
         {
-            var chartcoord = m_Viewport.DeviceToWorldCoord(mouse);
+            var chartcoord = Viewport.DeviceToWorldCoord(mouse);
 
             if (!_mHeaderInfo.H1Rect.Contains(chartcoord)
                 && !_mHeaderInfo.H2Rect.Contains(chartcoord))
@@ -1132,7 +1119,7 @@ namespace Edcore.GanttChart
 
         private int _GetDeviceColumnUnderMouse(Point mouse)
         {
-            var worldcoord = m_Viewport.DeviceToWorldCoord(mouse);
+            var worldcoord = Viewport.DeviceToWorldCoord(mouse);
 
             return _mHeaderInfo.Columns.Select((x, i) => new { x, i }).FirstOrDefault(x => x.x.Contains(worldcoord)).i;
         }
@@ -1144,7 +1131,7 @@ namespace Edcore.GanttChart
         /// <returns></returns>
         private int _DeviceCoordToChartRow(float y)
         {
-            y = m_Viewport.DeviceToWorldCoord(new PointF(0, y)).Y;
+            y = Viewport.DeviceToWorldCoord(new PointF(0, y)).Y;
             var row = (int)((y - this.BarSpacing - this.HeaderOneHeight) / this.BarSpacing);
             return row < 0 ? 0 : row;
         }
@@ -1181,7 +1168,7 @@ namespace Edcore.GanttChart
             if (m_Project != null)
             {
                 // Set model view matrix
-                graphics.Transform = m_Viewport.Projection;
+                graphics.Transform = Viewport.Projection;
 
                 // Generate rectangles
                 _GenerateModels();
@@ -1273,13 +1260,13 @@ namespace Edcore.GanttChart
                     row++;
                 }
             }
-            row += 5;
             
             // Update for listtask
             RowCount = row;
 
-            m_Viewport.WorldHeight = Math.Max(pHeight, row * this.BarSpacing + this.BarHeight);
-            m_Viewport.WorldWidth = Math.Max(pWidth, GetSpan(end) + 200);
+            //Viewport.WorldHeight = Math.Max(pHeight, row * this.BarSpacing + this.BarHeight);
+            Viewport.WorldHeight = Math.Max(pHeight, row * BarSpacing + HeaderOneHeight + HeaderTwoHeight);
+            Viewport.WorldWidth = Math.Max(pWidth, GetSpan(end) + 200);
         }
 
         /// <summary>
@@ -1288,8 +1275,8 @@ namespace Edcore.GanttChart
         private void _GenerateHeaders()
         {
             // only generate the necessary headers by determining the current viewport location
-            var h1Rect = new RectangleF(m_Viewport.X, m_Viewport.Y, m_Viewport.Rectangle.Width, this.HeaderOneHeight);
-            var h2Rect = new RectangleF(h1Rect.Left, h1Rect.Bottom, m_Viewport.Rectangle.Width, this.HeaderTwoHeight);
+            var h1Rect = new RectangleF(Viewport.X, Viewport.Y, Viewport.Rectangle.Width, this.HeaderOneHeight);
+            var h2Rect = new RectangleF(h1Rect.Left, h1Rect.Bottom, Viewport.Rectangle.Width, this.HeaderTwoHeight);
             var labelRects = new List<RectangleF>();
             var columns = new List<RectangleF>();
             var datetimes = new List<DateTime>();
@@ -1298,18 +1285,18 @@ namespace Edcore.GanttChart
             var minorDate = __CalculateViewportStart(); // start date of chart
             var minorInterval = GetSpan(MinorWidth);
             // calculate coordinates of rectangles
-            var labelRect_Y = m_Viewport.Y + this.HeaderOneHeight;
-            var labelRect_X = (int)(m_Viewport.X / MinorWidth) * MinorWidth;
+            var labelRect_Y = Viewport.Y + this.HeaderOneHeight;
+            var labelRect_X = (int)(Viewport.X / MinorWidth) * MinorWidth;
             var columns_Y = labelRect_Y + this.HeaderTwoHeight;
 
             // From second column onwards,
             // loop over the number of <TimeScaleDisplay> each with width of MajorWidth,
             // creating the Major and Minor header rects and generating respective date time information
-            while (labelRect_X < m_Viewport.Rectangle.Right) // keep creating H1 labels until we are out of the viewport
+            while (labelRect_X < Viewport.Rectangle.Right) // keep creating H1 labels until we are out of the viewport
             {
                 datetimes.Add(minorDate);
                 labelRects.Add(new RectangleF(labelRect_X, labelRect_Y, MinorWidth, HeaderTwoHeight));
-                columns.Add(new RectangleF(labelRect_X, columns_Y, MinorWidth, m_Viewport.Rectangle.Height));
+                columns.Add(new RectangleF(labelRect_X, columns_Y, MinorWidth, Viewport.Rectangle.Height));
                 minorDate += minorInterval;
                 labelRect_X += MinorWidth;
             }
@@ -1327,7 +1314,7 @@ namespace Edcore.GanttChart
         /// <returns></returns>
         private DateTime __CalculateViewportStart()
         {
-            float vpTime = (int)(m_Viewport.X / this.MinorWidth);
+            float vpTime = (int)(Viewport.X / this.MinorWidth);
             if (this.TimeResolution == Edcore.GanttChart.TimeResolution.Week)
             {
                 return m_Project.Start.AddDays(vpTime * 7);
@@ -1369,7 +1356,7 @@ namespace Edcore.GanttChart
         private void _DrawHeader(Graphics graphics, Rectangle clipRect)
         {
             var info = _mHeaderInfo;
-            var viewRect = m_Viewport.Rectangle;
+            var viewRect = Viewport.Rectangle;
 
             // Draw header backgrounds
             var e = new HeaderPaintEventArgs(graphics, clipRect, this, this.Font, this.HeaderFormat);
@@ -1384,7 +1371,7 @@ namespace Edcore.GanttChart
             // draw "Now" line
             float xf = GetSpan(m_Project.Now);
             var pen = new Pen(e.Format.Border.Color) { DashStyle = System.Drawing.Drawing2D.DashStyle.Dash };
-            graphics.DrawLine(pen, new PointF(xf, m_Viewport.Y), new PointF(xf, m_Viewport.Rectangle.Bottom));
+            graphics.DrawLine(pen, new PointF(xf, Viewport.Y), new PointF(xf, Viewport.Rectangle.Bottom));
         }
 
         private void __DrawScale(Graphics graphics, Rectangle clipRect, Font font, HeaderFormat headerformat, List<RectangleF> labelRects, List<DateTime> dates)
@@ -1416,15 +1403,15 @@ namespace Edcore.GanttChart
                     if (!string.IsNullOrEmpty(major.Text))
                     {
                         // Draw major label
-                        var majorLabelRect = new RectangleF(labelRects[i].X, m_Viewport.Y, this.MajorWidth, this.HeaderOneHeight);
+                        var majorLabelRect = new RectangleF(labelRects[i].X, Viewport.Y, this.MajorWidth, this.HeaderOneHeight);
                         var textbox = graphics.TextBoxAlign(major.Text, major.TextAlign, major.Font, majorLabelRect, major.Margin);
                         graphics.DrawString(major.Text, major.Font, major.Color, textbox);
-                        __DrawMarker(graphics, labelRects[i].X + MinorWidth / 2f, m_Viewport.Y + HeaderOneHeight - 2f);
+                        __DrawMarker(graphics, labelRects[i].X + MinorWidth / 2f, Viewport.Y + HeaderOneHeight - 2f);
                     }
                 }
 
                 // Draw dividers for minor scale
-                float y1 = m_Viewport.Y + HeaderOneHeight;
+                float y1 = Viewport.Y + HeaderOneHeight;
                 float y2 = y1 + HeaderTwoHeight;
                 foreach (RectangleF rect in _mHeaderInfo.Columns)
                 {
@@ -1469,7 +1456,7 @@ namespace Edcore.GanttChart
 
         private int _DrawTasks(Graphics graphics, Rectangle clipRect)
         {
-            var viewRect = m_Viewport.Rectangle;
+            var viewRect = Viewport.Rectangle;
             int row = 0;
             var crit_task_set = new HashSet<Task>(m_Project.CriticalPaths.SelectMany(x => x));
             var pen = new Pen(Color.Gray);
@@ -1538,7 +1525,7 @@ namespace Edcore.GanttChart
         /// <param name="graphics"></param>
         private void _DrawPredecessorLines(Graphics graphics)
         {
-            var viewRect = m_Viewport.Rectangle;
+            var viewRect = Viewport.Rectangle;
             RectangleF clipRectF = new RectangleF(viewRect.X, viewRect.Y, viewRect.Width, viewRect.Height);
             foreach (var precedent in m_Project.Precedents)
             {
@@ -1705,7 +1692,7 @@ namespace Edcore.GanttChart
         }
 
         ProjectManager<Task, object> m_Project = null; // The project to be visualised / rendered as a Gantt Chart
-        ControlViewport m_Viewport = null;
+        public ControlViewport Viewport = null;
         Task _mDraggedTask = null; // The dragged source Task
         Point _mDragTaskLastLocation = Point.Empty; // Record the task dragging mouse offset
         Point _mDragTaskStartLocation = Point.Empty;

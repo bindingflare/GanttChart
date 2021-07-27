@@ -11,7 +11,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void CreateAndRemoveTask()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
 
             // create first task
             var first = new Task();
@@ -40,7 +40,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void CreateAndRemoveTaskParts()
         {
-            var manager = new ProjectManager<Task, object>();
+            var manager = new ProjectManager<Task, object>("Testing");
 
             var split = new Task();
             var part1 = new Task();
@@ -97,7 +97,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void CreateAndRemoveGroup()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var group1 = new Task();
             var one = new Task();
             var two = new Task();
@@ -124,7 +124,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void ProjectEmptyEnumerators()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
 
             Assert.IsTrue(manager.Tasks.Count() == 0, string.Format("count == {0} != {1}",manager.Tasks.Count(), 0) );
             Assert.IsTrue(manager.Resources.Count() == 0);
@@ -133,7 +133,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void EnumerationShouldReturnEmptySet()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var alien = new Task();
 
             // test: Enumerators should at least return empty sets
@@ -151,7 +151,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void KnownTasksEnumeration()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var local = new Task();
             manager.Add(local);
 
@@ -169,7 +169,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void MoveSingleTaskToCheckForOutOfBoundHandling()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
 
             // create a task
             var first = new Task();
@@ -204,7 +204,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void MoveNonExistingTask()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var task = new Task();
             manager.Move(task, 1);
             Assert.IsTrue(manager.IndexOf(task) == -1);
@@ -213,7 +213,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void MoveTasksAroundSingleLevel()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
 
             // create tasks
             var one = new Task() { Name = "one" };
@@ -274,7 +274,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void MoveTaskIntoGroupUpdatesGroupSchedule()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
 
             // create tasks
             var group = new Task() { Name = "group" };
@@ -335,7 +335,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void MoveGroupsAround()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             // groups
             var group1 = new Task() { Name = "group1" };
             var group2 = new Task() { Name = "group2" };
@@ -516,7 +516,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void MovePartBecomeMoveSplitTask()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var one = new Task();
             var two = new Task();
             var split = new Task();
@@ -572,7 +572,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void GroupSetStartAdjustAllMembers()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var group1 = new Task();
             var precedent1 = new Task();
             var dependant1 = new Task();
@@ -629,7 +629,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void GroupKnownTasksAndGroups()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             
             var one = new Task();
             var two = new Task();
@@ -681,7 +681,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void GroupUnknownTasksIntoGroup()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var group = new Task();
             var one = new Task();
 
@@ -699,7 +699,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void GroupTaskIntoUnknownGroups()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var group = new Task();
             var one = new Task();
 
@@ -717,7 +717,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void UngroupUnknownTasksFromGroup()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var group = new Task();
             var member = new Task();
             var one = new Task();
@@ -737,8 +737,8 @@ namespace GanttChartNUnitTests
         [Test]
         public void UngroupTaskFromUnknownGroups()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
-            IProjectManager<Task, object> other = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
+            IProjectManager<Task, object> other = new ProjectManager<Task, object>("Testing");
             var group = new Task();
             var member = new Task();
             var one = new Task();
@@ -761,8 +761,8 @@ namespace GanttChartNUnitTests
         [Test]
         public void UngroupUnknownGroup()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
-            IProjectManager<Task, object> other = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
+            IProjectManager<Task, object> other = new ProjectManager<Task, object>("Testing");
             var group = new Task();
             var one = new Task();
             other.Add(group);
@@ -782,7 +782,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void UngroupAGroup()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var group1 = new Task();
             var group2 = new Task();
             var one =  new Task();
@@ -811,7 +811,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void UngroupNonGroup()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var group1 = new Task();
             manager.Add(group1);
 
@@ -823,7 +823,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void UngroupNullGroup()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var one = new Task();
             manager.Add(one);
 
@@ -841,7 +841,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void UngroupNullTaskFromGroup()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var group1 = new Task();
             var one = new Task();
             manager.Add(group1);
@@ -865,7 +865,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void UngroupPartShouldUngroupSplitTask()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var split = new Task();
             var part1 = new Task();
             var part2 = new Task();
@@ -891,7 +891,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void AdjustGroupDurationOnUngroup()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var split = new Task();
             var part1 = new Task();
             var part2 = new Task();
@@ -919,7 +919,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void GroupNullTaskIntoGroup()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var group1 = new Task();
             manager.Add(group1);
 
@@ -931,7 +931,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void GroupTaskIntoNullGroup()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             
             var one = new Task();
             manager.Add(one);
@@ -944,7 +944,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void GroupIntoSelf()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             
             var group1 = new Task();
 
@@ -957,7 +957,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void GroupChildIntoSelf()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var group1 = new Task();
             var one = new Task();
             manager.Add(group1);
@@ -975,7 +975,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void GroupIntoParent()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var group1 = new Task();
             var one = new Task();
             manager.Add(group1);
@@ -994,7 +994,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void GroupIntoAnotherGroupWhenAlreadyHaveGroup()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var group1 = new Task();
             var group2 = new Task();
             var one = new Task();
@@ -1018,7 +1018,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void SubGrouping()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             // create tasks in random order
             var a = new Task();
             var b = new Task();
@@ -1068,7 +1068,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void SubGroupOrdering()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             
             // create tasks in random order
             var a = new Task();
@@ -1131,7 +1131,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void GroupIntoGrandChild()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var group1 = new Task();
             var group2 = new Task();
             var one = new Task();
@@ -1153,7 +1153,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void GroupIntoGrandParent()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var group1 = new Task();
             var group2 = new Task();
             var one = new Task();
@@ -1178,7 +1178,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void GroupIntoChild()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var group1 = new Task();
             var one = new Task();
             manager.Add(group1);
@@ -1199,7 +1199,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void GroupTaskLevelAndOrdering()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
 
             var zero = new Task() { Name = "zero" };
             var one = new Task() { Name = "one" };
@@ -1277,7 +1277,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void CreateRelation()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var one = new Task();
             var two = new Task();
             manager.Add(one);
@@ -1298,7 +1298,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void CreateRelationWithNull()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var one = new Task();
             manager.Add(one);
 
@@ -1316,7 +1316,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void CreateRelationWithUnknownTasks()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var one = new Task();
             var two = new Task();
             manager.Add(one);
@@ -1335,7 +1335,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void CreateRelationThatAlreadyExist()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var one = new Task();
             var two = new Task();
             manager.Add(one);
@@ -1355,7 +1355,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void RemoveExistingRelation()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var one = new Task();
             var two = new Task();
             manager.Add(one);
@@ -1375,7 +1375,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void RemoveAllDependantsRelation()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var one = new Task();
             var two = new Task();
             var three = new Task();
@@ -1407,7 +1407,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void RemoveNonExistingRelation()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var one = new Task();
             var two = new Task();
             manager.Add(one);
@@ -1426,7 +1426,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void Create3LevelRelations()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var one = new Task();
             var two = new Task();
             var three = new Task();
@@ -1459,7 +1459,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void CircularRelationLevel1()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var one = new Task();
             var two = new Task();
             manager.Add(one);
@@ -1489,7 +1489,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void CircularRelationLevel2()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var one = new Task();
             var two = new Task();
             var three = new Task();
@@ -1522,7 +1522,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void RelateMultipleDependants()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var one = new Task();
             var two = new Task();
             var three = new Task();
@@ -1549,7 +1549,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void GroupCollapseDoesNotAffectRelateSplitTask()
         {
-            var manager = new ProjectManager<Task, object>();
+            var manager = new ProjectManager<Task, object>("Testing");
             var precedent = new Task() { Name = "Precedent" };
             var split = new Task() { Name = "split" };
             var part1 = new Task() { Name = "part1" };
@@ -1621,7 +1621,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void AssignResource()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var one = new Task();
             var res = new Task() { Name = "Resource" };
             manager.Add(one);
@@ -1644,7 +1644,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void AssignResourceForUnknownTasks()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var one = new Task();
             var res = new Task() { Name = "Resource" };
 
@@ -1663,7 +1663,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void AssignSameResourceToSameTask()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var one = new Task();
             var res = new Task() { Name = "Resource" };
             manager.Add(one);
@@ -1690,7 +1690,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void AssignSameResourceToDifferentTask()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var one = new Task();
             var two = new Task();
             var res = new Task() { Name = "Resource" };
@@ -1722,7 +1722,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void TwoWayResourceLookup()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var one = new Task();
             var two = new Task();
             var r1 = new Task();
@@ -1764,7 +1764,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void UnassignSpecificResource()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var one = new Task();
             var r1 = new Task();
             var r2 = new Task();
@@ -1791,7 +1791,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void UnassignAllResourceFromTask()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var one = new Task();
             var two = new Task();
             var r1 = new Task();
@@ -1829,7 +1829,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void UnassignResourceFromAllTask()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var one = new Task();
             var two = new Task();
             var r1 = new object();
@@ -1867,7 +1867,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void GroupCannotBeRelated()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var group = new Task();
             var member = new Task();
             var one = new Task();
@@ -1899,7 +1899,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void HasRelationTaskCannotBecomeGroup()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var one = new Task();
             var two = new Task();
             var member = new Task();
@@ -1930,7 +1930,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void SplitTaskAndConfirmStructure()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var split = new Task();
             var part1 = new Task();
             var part2 = new Task();
@@ -1962,7 +1962,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void SplitTaskAndConfirmSchedule()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var split = new Task() { Name = "split" };
             var part1 = new Task() { Name = "part1" };
             var part2 = new Task() { Name = "part2" };
@@ -1992,7 +1992,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void SplitNullTaskNoEffect()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var part1 = new Task();
             var part2 = new Task();
 
@@ -2009,7 +2009,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void SplitTaskUsingRegularTaskNoEffect()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var one = new Task();
             var two = new Task();
             var three = new Task();
@@ -2031,7 +2031,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void SplitTask()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var split = new Task();
             var part1 = new Task();
             var part2 = new Task();
@@ -2055,7 +2055,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void SplitNonExistingPart()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var part1 = new Task();
             var part2 = new Task();
 
@@ -2074,7 +2074,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void SplitNullPart()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var split = new Task();
             var part1 = new Task();
             var part2 = new Task();
@@ -2106,7 +2106,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void JoinNullPart()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var task = new Task();
             
             // test: two nulls (no effect)
@@ -2121,7 +2121,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void JoinPartFromDifferentSplitTask()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var split1 = new Task();
             var part1a = new Task();
             var part1b = new Task();
@@ -2166,7 +2166,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void JoinPartsConfirmPackedSchedule()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var split = new Task();
             var part1 = new Task();
             var part2 = new Task();
@@ -2218,7 +2218,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void AllowRelateSplitTaskToTask()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var split = new Task();
             var part1a = new Task();
             var part1b = new Task();
@@ -2257,7 +2257,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void DoNotRelatePartsOfTheSameSplitTask()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var split = new Task();
             var part1a = new Task();
             var part1b = new Task();
@@ -2291,7 +2291,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void RelateUnrelatePartsBecomeRelateUnrelateSplitTasks()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var split1 = new Task();
             var part1a = new Task();
             var part1b = new Task();
@@ -2352,7 +2352,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void SplitTaskUsingSamePartsNoEffect()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var split = new Task();
             var part = new Task();
             manager.Add(split);
@@ -2374,7 +2374,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void SplitPartUsingSamePartsNoEffect()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var split = new Task();
             var part1 = new Task();
             var part2 = new Task();
@@ -2402,7 +2402,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void RelatedTaskCannotBecomeParts()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var split = new Task();
             var part1 = new Task();
             var part2 = new Task();
@@ -2429,7 +2429,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void SplitPart()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var split = new Task();
             var part1 = new Task() { Name = "part1" };
             var part2 = new Task() { Name = "part2" };
@@ -2490,7 +2490,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void SplitPartAsThoughItIsTask()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var split = new Task();
             var part1 = new Task() { Name = "part1" };
             var part2 = new Task() { Name = "part2" };
@@ -2517,7 +2517,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void JoinParts()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var split = new Task();
             var part1 = new Task();
             var part2 = new Task();
@@ -2550,7 +2550,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void JoinPartRemainSinglePartBecomeRegularTask()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var split = new Task();
             var part1 = new Task();
             var part2 = new Task();
@@ -2579,7 +2579,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void MergeSplittedTask()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var split = new Task();
             var part1 = new Task();
             var part2 = new Task();
@@ -2617,7 +2617,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void GroupPartsBecomeGroupSplitTask()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var split = new Task() { Name = "split" };
             var part1 = new Task() { Name = "part1" };
             var part2 = new Task() { Name = "part2" };
@@ -2666,7 +2666,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void UngroupPartBecomeUngroupSplitTask()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var split = new Task() { Name = "split" };
             var part1 = new Task() { Name = "part1" };
             var part2 = new Task() { Name = "part2" };
@@ -2708,7 +2708,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void JoinPartConfirmSchedule()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var split = new Task();
             var part1 = new Task();
             var part2 = new Task();
@@ -2743,7 +2743,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void JoinIntoMerge()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var split = new Task();
             var part1 = new Task();
             var part2 = new Task();
@@ -2765,7 +2765,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void DeleteMiddlePart()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var split = new Task();
             var part1 = new Task();
             var part2 = new Task();
@@ -2807,7 +2807,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void DeleteLastPart()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var split = new Task();
             var part1 = new Task();
             var part2 = new Task();
@@ -2846,7 +2846,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void DeleteFirstPart()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var split = new Task();
             var part1 = new Task();
             var part2 = new Task();
@@ -2887,7 +2887,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void CannotSetCompleteOnSplitTask()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var split = new Task();
             var part1 = new Task();
             var part2 = new Task();
@@ -2910,7 +2910,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void AdjustGroupDurationOnSplit()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var group = new Task();
             var split = new Task();
             var part1 = new Task();
@@ -2934,7 +2934,7 @@ namespace GanttChartNUnitTests
         [Test]
         public void AdjustGroupDuringJoin()
         {
-            IProjectManager<Task, object> manager = new ProjectManager<Task, object>();
+            IProjectManager<Task, object> manager = new ProjectManager<Task, object>("Testing");
             var group = new Task();
             var split = new Task();
             var part1 = new Task();

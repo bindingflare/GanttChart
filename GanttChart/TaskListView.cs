@@ -485,7 +485,7 @@ namespace Edcore.GanttChart
             float labelMargin = m_Chart.MinorWidth / 2.0f - 2f;
 
             // Convert Y
-            float listTop = m_Chart.ViewportY();
+            float listTop = m_Chart.Viewport.Y;
             float headerStartY = m_ListViewport.Y + m_Chart.HeaderOneHeight;
             float listStartY = headerStartY + m_Chart.HeaderOneHeight;
             float listBottom = listTop + m_ListViewport.Rectangle.Bottom;
