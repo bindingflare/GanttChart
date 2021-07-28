@@ -187,29 +187,24 @@ namespace Edcore.GanttChart
         public ControlViewport(Control view)
         {
             _mDevice = view;
-            _mhScroll = new HScrollBar();
-            _mvScroll = new VScrollBar();
+            HorizontalScroll = new HScrollBar();
+            VerticalScroll = new VScrollBar();
             _mScrollHolePatch = new UserControl();
             WorldWidth = view.Width;
             WorldHeight = view.Height;
 
-            _mDevice.Controls.Add(_mhScroll);
-            _mDevice.Controls.Add(_mvScroll);
+            _mDevice.Controls.Add(HorizontalScroll);
+            _mDevice.Controls.Add(VerticalScroll);
             _mDevice.Controls.Add(_mScrollHolePatch);
 
-            _mhScroll.Scroll += (s, e) => X = e.NewValue;
-            _mvScroll.Scroll += (s, e) => Y = e.NewValue;
+            HorizontalScroll.Scroll += (s, e) => X = e.NewValue;
+            VerticalScroll.Scroll += (s, e) => Y = e.NewValue;
             _mDevice.Resize += (s, e) => this.Resize();
             _mDevice.MouseWheel += (s, e) => Y -= e.Delta > 0 ? WheelDelta : -WheelDelta;
-            WheelDelta = _mvScroll.LargeChange;
+            WheelDelta = VerticalScroll.LargeChange;
 
             _RecalculateMatrix();
             _RecalculateRectangle();
-        }
-
-        public void RegisterScrollEvent(ScrollEventHandler handle)
-        {
-            _mvScroll.Scroll += handle;
         }
 
         /// <summary>
@@ -221,6 +216,9 @@ namespace Edcore.GanttChart
         /// Get or set the number of pixels to scroll on each click of the mouse
         /// </summary>
         public int WheelDelta { get; set; }
+
+        public HScrollBar HorizontalScroll { get; set; }
+        public VScrollBar VerticalScroll { get; set; }
 
         /// <summary>
         /// Get the Rectangle area in world coordinates where the Viewport is currently viewing over
@@ -249,36 +247,36 @@ namespace Edcore.GanttChart
         /// </summary>
         public void Resize()
         {
-            _mhScroll.Dock = DockStyle.None;
-            _mhScroll.Location = new Point(0, _mDevice.Height - _mhScroll.Height);
-            _mhScroll.Width = _mDevice.Width - _mvScroll.Width;
+            HorizontalScroll.Dock = DockStyle.None;
+            HorizontalScroll.Location = new Point(0, _mDevice.Height - HorizontalScroll.Height);
+            HorizontalScroll.Width = _mDevice.Width - VerticalScroll.Width;
             
-            _mvScroll.Dock = DockStyle.None;
-            _mvScroll.Location = new Point(_mDevice.Width - _mvScroll.Width, 0);
-            _mvScroll.Height = _mDevice.Height - _mhScroll.Height;
+            VerticalScroll.Dock = DockStyle.None;
+            VerticalScroll.Location = new Point(_mDevice.Width - VerticalScroll.Width, 0);
+            VerticalScroll.Height = _mDevice.Height - HorizontalScroll.Height;
 
-            _mScrollHolePatch.Location = new Point(_mhScroll.Right, _mvScroll.Bottom);
-            _mScrollHolePatch.Size = new Size(_mvScroll.Width, _mhScroll.Height);
+            _mScrollHolePatch.Location = new Point(HorizontalScroll.Right, VerticalScroll.Bottom);
+            _mScrollHolePatch.Size = new Size(VerticalScroll.Width, HorizontalScroll.Height);
 
             if (WorldWidth <= _mDevice.Width)
             {
-                _mhScroll.Hide();
+                HorizontalScroll.Hide();
             }
             else
             {
-                _mhScroll.Maximum = (int)(WorldWidth - _mDevice.Width);
-                _mhScroll.Show();
+                HorizontalScroll.Maximum = (int)(WorldWidth - _mDevice.Width);
+                HorizontalScroll.Show();
 
             }
 
             if (WorldHeight <= _mDevice.Height)
             {
-                _mvScroll.Hide();
+                VerticalScroll.Hide();
             }
             else
             {
-                _mvScroll.Maximum = (int)(WorldHeight - _mDevice.Height);
-                _mvScroll.Show();
+                VerticalScroll.Maximum = (int)(WorldHeight - _mDevice.Height);
+                //VerticalScroll.Show();
             }
 
             _RecalculateRectangle();
@@ -356,14 +354,14 @@ namespace Edcore.GanttChart
         /// </summary>
         public float X
         {
-            get { return _mhScroll.Value; }
+            get { return HorizontalScroll.Value; }
             set
             {
-                if (!((int)value).Equals(_mhScroll.Value))
+                if (!((int)value).Equals(HorizontalScroll.Value))
                 {
-                    if (value > _mhScroll.Maximum) value = _mhScroll.Maximum;
+                    if (value > HorizontalScroll.Maximum) value = HorizontalScroll.Maximum;
                     else if (value < 0) value = 0;
-                    _mhScroll.Value = (int)value;
+                    HorizontalScroll.Value = (int)value;
                     _RecalculateRectangle();
                     _RecalculateMatrix();
                     _mDevice.Invalidate();
@@ -376,14 +374,14 @@ namespace Edcore.GanttChart
         /// </summary>
         public float Y
         {
-            get { return _mvScroll.Value; }
+            get { return VerticalScroll.Value; }
             set
             {
-                if (!((int)value).Equals(_mvScroll.Value))
+                if (!((int)value).Equals(VerticalScroll.Value))
                 {
-                    if (value > _mvScroll.Maximum) value = _mvScroll.Maximum;
+                    if (value > VerticalScroll.Maximum) value = VerticalScroll.Maximum;
                     else if (value < 0) value = 0;
-                    _mvScroll.Value = (int)value;
+                    VerticalScroll.Value = (int)value;
                     _RecalculateRectangle();
                     _RecalculateMatrix();
                     _mDevice.Invalidate();
@@ -403,8 +401,6 @@ namespace Edcore.GanttChart
         }
 
         Control _mDevice;
-        HScrollBar _mhScroll;
-        VScrollBar _mvScroll;
         UserControl _mScrollHolePatch;
         RectangleF _mRectangle = RectangleF.Empty;
         Matrix _mMatrix = new Matrix();

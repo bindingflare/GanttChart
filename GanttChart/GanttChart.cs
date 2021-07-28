@@ -53,7 +53,7 @@ namespace Edcore.GanttChart
             InitializeComponent();
 
             // Factory values
-            HeaderOneHeight = 32;
+            HeaderOneHeight = 33;
             HeaderTwoHeight = 26;
             BarSpacing = 32;
             BarHeight = 20;
@@ -62,7 +62,7 @@ namespace Edcore.GanttChart
             TimeResolution = TimeResolution.Day;
             this.DoubleBuffered = true;
             Viewport = new ControlViewport(this) { WheelDelta = BarSpacing };
-            Viewport.RegisterScrollEvent(GanttChart_OnScroll);
+            //Viewport.RegisterScrollEvent(GanttChart_OnScroll);
             AllowTaskDragDrop = true;
             ShowRelations = true;
             ShowSlack = false;
@@ -1196,6 +1196,9 @@ namespace Edcore.GanttChart
                 // Nothing to draw
             }
 
+            //graphics.DrawRectangle(this.HeaderFormat.Border, new RectangleF(Viewport.X, this.HeaderTwoHeight + this.HeaderOneHeight, 100f, 32f));
+            //graphics.DrawRectangle(this.HeaderFormat.Border, new RectangleF(Viewport.X, 1006 * BarSpacing + HeaderOneHeight + HeaderTwoHeight, 100f, 32f));
+
             // Flush
             graphics.Flush();
         }
@@ -1265,7 +1268,7 @@ namespace Edcore.GanttChart
             RowCount = row;
 
             //Viewport.WorldHeight = Math.Max(pHeight, row * this.BarSpacing + this.BarHeight);
-            Viewport.WorldHeight = Math.Max(pHeight, row * BarSpacing + HeaderOneHeight + HeaderTwoHeight);
+            Viewport.WorldHeight = Math.Max(pHeight, (row + 1)* BarSpacing + HeaderOneHeight + HeaderTwoHeight + Viewport.HorizontalScroll.ClientSize.Height); // LAZYFIX: Add single row to world height to keep sync with task_list when scrolled to the bottom
             Viewport.WorldWidth = Math.Max(pWidth, GetSpan(end) + 200);
         }
 

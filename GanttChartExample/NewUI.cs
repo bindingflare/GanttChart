@@ -18,11 +18,10 @@ namespace Edcore.GanttChart
     public partial class NewUI : Form
     {
         OverlayPainter _mOverlay = new OverlayPainter();
-
         ProjectManager m_Manager = null;
-
         Form taskForm = null;
 
+        private int scrollFix = 0;
 
         /// <summary>
         /// Example starts here
@@ -43,14 +42,17 @@ namespace Edcore.GanttChart
             m_Chart.CreateTaskDelegate = delegate () { return new MyTask(m_Manager); };
 
             // Initialize the Tasklist
-            m_TaskList.RowHeight = m_Chart.BarSpacing;
+            m_TaskList.RowHeight = m_Chart.BarSpacing - 1;
             m_TaskList.CanExpandGetter = delegate (object x) { return ((Task)x).CanExpand; };
             m_TaskList.ChildrenGetter = delegate (object x) { return ((Task)x).Children; };
             m_TaskList.AllowColumnReorder = true;
             m_TaskList.CellEditActivation = ObjectListView.CellEditActivateMode.SingleClick;
+            m_TaskList.CellEditUseWholeCell = true;
+
+            // Set width of Tasklist using splitter
+            m_SplitContainer.SplitterDistance = 400;
 
             GenerateListView(m_TaskList, m_Manager.HeaderList);
-            //Control.ControlCollection col = m_TaskList.Scro;
 
             // Perform some task operations
             _registerCustomField("Important", "string", 80.0f);
@@ -165,7 +167,7 @@ namespace Edcore.GanttChart
             _mOverlay.PrintMode = true;
             m_Chart.PaintOverlay += _mOverlay.ChartOverlayPainter;
             m_Chart.AllowTaskDragDrop = true;
-            m_Chart.Scroll += new ScrollEventHandler(_mChart_Scroll);
+            //m_Chart.Scroll += new ScrollEventHandler(_mChart_Scroll);
             m_Chart.MouseWheel += new MouseEventHandler(_mChart_MouseWheel);
 
             // Tasklist event listeners
@@ -173,6 +175,19 @@ namespace Edcore.GanttChart
             m_TaskList.Collapsed += new EventHandler<TreeBranchCollapsedEventArgs>(m_TaskList_Collapsed);
             m_TaskList.CellEditValidating += new CellEditEventHandler(m_TaskList_CellEditValidating);
             m_TaskList.CellEditFinishing += new CellEditEventHandler(m_TaskList_CellEditFinishing);
+            m_TaskList.Scroll += new EventHandler<ScrollEventArgs>(m_TaskList_Scroll);
+            m_TaskList.CellEditStarting += (sender, args) =>
+            {
+                // Left align the edit control
+                args.Control.Location = args.CellBounds.Location;
+
+                // Readjust the size of the control to fill the whole cell if CellEditUseWholeCellEffective is enabled
+                if (args.Column.CellEditUseWholeCellEffective)
+                {
+                    args.Control.Size = args.CellBounds.Size;
+                }
+
+            };
 
             // Splitter event listeners
             m_SplitContainer.SplitterMoved += new SplitterEventHandler(m_SplitContainer_SplitterMoved);
@@ -282,9 +297,30 @@ namespace Edcore.GanttChart
             }
         }
 
+        private void m_TaskList_Scroll(object sender, ScrollEventArgs e)
+        {
+            if (e.ScrollOrientation == ScrollOrientation.VerticalScroll)
+            {
+                m_Chart.Viewport.Y = (e.NewValue + scrollFix) * m_Chart.BarSpacing;
+            }
+
+            scrollFix = 0;
+        }
+
         private void _mChart_MouseWheel(object sender, MouseEventArgs e)
         {
-            int delta = e.Delta > 0 ? -m_Chart.Viewport.WheelDelta : m_Chart.Viewport.WheelDelta;
+            int delta;
+            if(e.Delta > 0)
+            {
+                delta = -m_Chart.Viewport.WheelDelta;
+                scrollFix = -1;
+            }
+            else
+            {
+                delta = m_Chart.Viewport.WheelDelta;
+                scrollFix = 1;
+            }
+
             m_TaskList.LowLevelScroll(0, delta);
         }
 
