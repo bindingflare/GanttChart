@@ -157,7 +157,7 @@ namespace Edcore.GanttChart
             m_TaskList.Roots = tasks;
             m_TaskList.ExpandAll();
             m_TaskList.Refresh();
-            
+
             // GanttChart event listeners
             m_Chart.TaskMouseOver += new EventHandler<TaskMouseEventArgs>(m_Chart_TaskMouseOver);
             m_Chart.TaskMouseOut += new EventHandler<TaskMouseEventArgs>(m_Chart_TaskMouseOut);
@@ -220,17 +220,17 @@ namespace Edcore.GanttChart
         private void m_SplitContainer_SplitterMoved(object sender, SplitterEventArgs e)
         {
             float maxSize = 0;
-            foreach(OLVColumn column in m_TaskList.AllColumns)
+            foreach (OLVColumn column in m_TaskList.AllColumns)
             {
-                if(column.IsVisible)
+                if (column.IsVisible)
                 {
                     maxSize += column.Width;
                 }
             }
 
-            if(e.X > maxSize)
+            if (e.X > maxSize)
             {
-                m_SplitContainer.SplitterDistance = (int) maxSize + 20;
+                m_SplitContainer.SplitterDistance = (int)maxSize + 20;
             }
         }
 
@@ -310,7 +310,7 @@ namespace Edcore.GanttChart
         private void _mChart_MouseWheel(object sender, MouseEventArgs e)
         {
             int delta;
-            if(e.Delta > 0)
+            if (e.Delta > 0)
             {
                 delta = -m_Chart.Viewport.WheelDelta;
                 scrollFix = -1;
@@ -350,8 +350,8 @@ namespace Edcore.GanttChart
                 columnHeader.Width = (int)header.Size;
                 columnHeader.Text = header.Title;
                 columnHeader.AspectGetter = delegate (object x) { return m_Manager.GetField((Task)x, index); };
-                columnHeader.AspectToStringConverter = delegate (object x){return m_Manager.FormatData(x); };
-                
+                columnHeader.AspectToStringConverter = delegate (object x) { return m_Manager.FormatData(x); };
+
                 columnHeader.IsVisible = !header.Hidden;
 
                 columnsList.Add(columnHeader);
@@ -981,6 +981,66 @@ namespace Edcore.GanttChart
                 }
             }
         }
+
+        private void searchTextBox_TextChanged(object sender, EventArgs e)
+        {
+            //if (searchTextBox.Text.Length > 0)
+            //{
+            //    // Perform simple search
+            //    m_TaskList.ModelFilter = new ModelFilter(delegate (object x)
+            //    {
+            //        Task task = (Task)x;
+            //        task.IsFiltered = !_TaskContainsKeyword(task, searchTextBox.Text);
+
+            //        if (m_Manager.IsGroup(task))
+            //        {
+            //            task.IsFiltered = true;
+            //        }
+            //        else
+            //        {
+            //            // update parent's filtered
+            //            Task parent = task;
+            //            while (m_Manager.IsMember(parent))
+            //            {
+            //                parent = m_Manager.DirectGroupOf(task);
+            //                parent.IsFiltered = parent.IsFiltered && !task.IsFiltered;
+            //            }
+
+            //        }
+
+            //        return !task.IsFiltered;
+            //    });
+            //}
+            //else
+            //{
+            //    m_TaskList.ModelFilter = new ModelFilter(delegate (object x)
+            //    {
+            //        ((Task)x).IsFiltered = false;
+            //        return true;
+            //    });
+            //}
+
+            var filters = new List<IModelFilter>();
+            TextMatchFilter highlightingFilter = null;
+            if (!String.IsNullOrEmpty(searchTextBox.Text))
+            {
+                var words = searchTextBox.Text.Trim().Split(null);
+                highlightingFilter = TextMatchFilter.Contains(m_TaskList, words);
+                foreach (var word in words)
+                {
+                    var filter = TextMatchFilter.Contains(m_TaskList, word);
+                    filters.Add(filter);
+                }
+            }
+            var compositeFilter = new CompositeAllFilter(filters);
+
+            m_TaskList.ModelFilter = highlightingFilter;
+            m_TaskList.AdditionalFilter = compositeFilter;
+            m_TaskList.DefaultRenderer = new HighlightTextRenderer(highlightingFilter);
+
+            m_Chart.Invalidate();
+        }
+
         private void _registerCustomField(string fieldName, string type, float fieldSize)
         {
             m_Manager.AddCustomField(fieldName, type, fieldSize);
@@ -995,12 +1055,12 @@ namespace Edcore.GanttChart
             columnHeader.Text = header.Title;
             columnHeader.AspectGetter = delegate (object x) { return m_Manager.GetField((Task)x, index); };
             columnHeader.AspectToStringConverter = delegate (object x) { return m_Manager.FormatData(x); };
-            columnHeader.AspectPutter = delegate (object x, object value) 
+            columnHeader.AspectPutter = delegate (object x, object value)
             {
                 m_Manager.SetField((Task)x, index, (string)value);
             };
             columnHeader.IsVisible = !header.Hidden;
-            
+
             m_TaskList.AllColumns.Add(columnHeader);
             m_TaskList.RebuildColumns();
         }
@@ -1120,6 +1180,29 @@ namespace Edcore.GanttChart
             choice = -1;
             return false;
         }
+
+        private bool _TaskContainsKeyword(Task task, string term)
+        {
+            if (task.Name.Contains(term) || task.Complete.ToString("p").Contains(term))
+            {
+                return true;
+            }
+
+            foreach (string str in task.CustomFieldsData)
+            {
+                if (str == null)
+                {
+                    continue;
+                }
+
+                if (str.Contains(str))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 
     #region overlay painter
@@ -1209,6 +1292,23 @@ namespace Edcore.GanttChart
 
         private ProjectManager Manager { get; set; }
         public new float Complete { get { return base.Complete; } set { Manager.SetComplete(this, value); } }
+
+        /// <summary>
+        /// Convert this Task to a descriptive string
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            string str = string.Format("[Name: {0}, Start: {1}, End: {2}, Duration: {3}, Complete: {4}, CanExpand: {5}, IsCollapsed: {6}, IsFiltered: {7}, UserFields: ", Name, Start, End, Duration, Complete, CanExpand, IsCollapsed, IsFiltered);
+
+            for (int i = 0; i < CustomFieldsData.Length - 1; i++)
+            {
+                str += CustomFieldsData[i] + ", ";
+            }
+            str += CustomFieldsData[CustomFieldsData.Length - 1] + "]";
+
+            return str;
+        }
     }
     #endregion custom task and resource
 }

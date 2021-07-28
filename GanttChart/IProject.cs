@@ -12,11 +12,15 @@ namespace Edcore.GanttChart
     [Serializable]
     public class Task
     {
+        static int ID_GENERATOR = 0;
         /// <summary>
         /// Initialize a new task to hold schedule information
         /// </summary>
         public Task()
         {
+            ID = ID_GENERATOR.ToString();
+            ID_GENERATOR++;
+
             Complete = 0.0f;
             Start = TimeSpan.Zero;
             End = new TimeSpan(1, 0, 0, 0);
@@ -31,10 +35,7 @@ namespace Edcore.GanttChart
         [OLVColumn(Width = 200)]
         public string Name { get; set; }
 
-        /// <summary>
-        /// Indicate whether this task is collapsed such that sub tasks are hidden from view. Only groups can be collasped.
-        /// </summary>
-        public bool IsCollapsed { get; set; }
+
 
         /// <summary>
         /// Get or set the pecentage complete of this task, expressed in float between 0.0 and 1.0f.
@@ -80,12 +81,23 @@ namespace Edcore.GanttChart
         public bool CanExpand { get; set; }
 
         /// <summary>
+        /// Indicate whether this task is collapsed such that sub tasks are hidden from view. Only groups can be collasped.
+        /// </summary>
+        public bool IsCollapsed { get; set; }
+
+        /// <summary>
+        /// Indicate whether this task is filtered such that it is hidden from view. Inherits isFiltered from its parent under normal behavior.
+        /// </summary>
+        public bool IsFiltered { get; set; }
+        public string ID { get; internal set; }
+
+        /// <summary>
         /// Convert this Task to a descriptive string
         /// </summary>
         /// <returns></returns>
         public override string ToString()
         {
-            string str = string.Format("[Name = {0}, Start = {1}, End = {2}, Duration = {3}, Complete = {4}, UserFields = ", Name, Start, End, Duration, Complete);
+            string str = string.Format("[Name: {0}, Start: {1}, End: {2}, Duration: {3}, Complete: {4}, CanExpand: {5}, IsCollapsed: {6}, IsFiltered: {7}, UserFields: ", Name, Start, End, Duration, Complete);
 
             for (int i = 0; i < CustomFieldsData.Length - 1; i++)
             {

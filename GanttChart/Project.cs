@@ -1165,7 +1165,7 @@ namespace Edcore.GanttChart
             switch (index)
             {
                 case 0:
-                    return "ID";
+                    return task.ID;
                 case 1:
                     return task.Name;
                 case 2:
@@ -1186,7 +1186,7 @@ namespace Edcore.GanttChart
             switch (index)
             {
                 case 0:
-                    return "ID";
+                    return task.ID;
                 case 1:
                     return task.Name;
                 case 2:
@@ -1218,7 +1218,7 @@ namespace Edcore.GanttChart
             }
             else if (data is float)
             {
-                return ((float)data).ToString("%");
+                return ((float)data).ToString("p");
             }
             else
             {
