@@ -626,13 +626,18 @@ namespace Edcore.GanttChart
         {
             // start a new Project and init the chart with the project
             m_Manager = new ProjectManager("New Project");
-            m_Manager.Add(new Task() { Name = "New Task" });
+            m_Manager.Add(new MyTask(m_Manager) { Name = "New Task" });
 
+            // restart chart
             m_Chart.Init(m_Manager);
             m_Chart.CreateTaskDelegate = delegate () { return new MyTask(m_Manager); };
 
             m_Chart.Invalidate();
-            //m_Tasklist.Invalidate();
+
+            // restart tasklist
+            m_TaskList.Reset();
+            m_TaskList.Roots = m_Manager.RootTasks;
+            GenerateListView(m_TaskList, m_Manager.HeaderList);
         }
 
         private void mnuHelpAbout_Click(object sender, EventArgs e)

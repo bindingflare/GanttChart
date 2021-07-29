@@ -36,7 +36,7 @@ namespace Edcore.GanttChart
         Dictionary<T, T> m_groupOfMemberMap = new Dictionary<T, T>(); // Map member task to parent group task
         Dictionary<T, int> m_taskIndicesMap = new Dictionary<T, int>(); // Map the task to its zero-based index order position
 
-        public List<Header> HeaderList = new List<Header>(); // Map the userFields to array position in Task.UserFields
+        public List<Header> HeaderList; // Map the userFields to array position in Task.UserFields
 
         public float FieldMinSize = 20;
         public float FieldMaxSize = 1000;
@@ -51,6 +51,7 @@ namespace Edcore.GanttChart
             Name = projectName;
 
             // Add default headers
+            HeaderList = new List<Header>();
             HeaderList.Add(new Header("Name", "tree", 0, 200f));
             HeaderList.Add(new Header("ID", "string", 1, 60f, false, true));
             HeaderList.Add(new Header("Start", "date", 2, 125f));
