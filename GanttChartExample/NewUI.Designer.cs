@@ -71,6 +71,7 @@ namespace Edcore.GanttChart
             this.fieldsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.createCustomFieldToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.deleteCustomFieldToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.editFieldToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuHelpAbout = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
@@ -390,6 +391,7 @@ namespace Edcore.GanttChart
             this.showAllHeadersToolStripMenuItem.Name = "showAllHeadersToolStripMenuItem";
             this.showAllHeadersToolStripMenuItem.Size = new System.Drawing.Size(165, 22);
             this.showAllHeadersToolStripMenuItem.Text = "Show all headers";
+            this.showAllHeadersToolStripMenuItem.Click += new System.EventHandler(this.showAllHeadersToolStripMenuItem_Click);
             // 
             // tasksToolStripMenuItem
             // 
@@ -426,7 +428,8 @@ namespace Edcore.GanttChart
             // 
             this.fieldsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.createCustomFieldToolStripMenuItem,
-            this.deleteCustomFieldToolStripMenuItem});
+            this.deleteCustomFieldToolStripMenuItem,
+            this.editFieldToolStripMenuItem});
             this.fieldsToolStripMenuItem.Name = "fieldsToolStripMenuItem";
             this.fieldsToolStripMenuItem.Size = new System.Drawing.Size(49, 20);
             this.fieldsToolStripMenuItem.Text = "Fields";
@@ -434,16 +437,23 @@ namespace Edcore.GanttChart
             // createCustomFieldToolStripMenuItem
             // 
             this.createCustomFieldToolStripMenuItem.Name = "createCustomFieldToolStripMenuItem";
-            this.createCustomFieldToolStripMenuItem.Size = new System.Drawing.Size(117, 22);
+            this.createCustomFieldToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.createCustomFieldToolStripMenuItem.Text = "New...";
             this.createCustomFieldToolStripMenuItem.Click += new System.EventHandler(this.createCustomFieldToolStripMenuItem_Click);
             // 
             // deleteCustomFieldToolStripMenuItem
             // 
             this.deleteCustomFieldToolStripMenuItem.Name = "deleteCustomFieldToolStripMenuItem";
-            this.deleteCustomFieldToolStripMenuItem.Size = new System.Drawing.Size(117, 22);
+            this.deleteCustomFieldToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.deleteCustomFieldToolStripMenuItem.Text = "Delete...";
             this.deleteCustomFieldToolStripMenuItem.Click += new System.EventHandler(this.deleteCustomFieldToolStripMenuItem_Click);
+            // 
+            // editFieldToolStripMenuItem
+            // 
+            this.editFieldToolStripMenuItem.Name = "editFieldToolStripMenuItem";
+            this.editFieldToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.editFieldToolStripMenuItem.Text = "Edit Field...";
+            this.editFieldToolStripMenuItem.Click += new System.EventHandler(this.editFieldToolStripMenuItem_Click_1);
             // 
             // helpToolStripMenuItem
             // 
@@ -868,7 +878,7 @@ namespace Edcore.GanttChart
             this.m_TaskList.Location = new System.Drawing.Point(0, 32);
             this.m_TaskList.Margin = new System.Windows.Forms.Padding(0);
             this.m_TaskList.Name = "m_TaskList";
-            this.m_TaskList.SelectedBackColor = System.Drawing.SystemColors.HighlightText;
+            this.m_TaskList.SelectedBackColor = System.Drawing.SystemColors.ControlText;
             this.m_TaskList.SelectedColumnTint = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(180)))), ((int)(((byte)(180)))), ((int)(((byte)(180)))));
             this.m_TaskList.ShowGroups = false;
             this.m_TaskList.Size = new System.Drawing.Size(428, 648);
@@ -1038,6 +1048,7 @@ namespace Edcore.GanttChart
         private System.Windows.Forms.Label projectTitleLabel;
         private BrightIdeasSoftware.TreeListView m_TaskList;
         private System.Windows.Forms.TextBox m_SearchTextBox;
+        private System.Windows.Forms.ToolStripMenuItem editFieldToolStripMenuItem;
     }
 }
 
