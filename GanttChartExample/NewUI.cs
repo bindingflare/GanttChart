@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
@@ -22,6 +23,7 @@ namespace Edcore.GanttChart
         Form taskForm = null;
 
         private int scrollFix = 0;
+        private bool searchMode = false;
 
         /// <summary>
         /// Example starts here
@@ -82,6 +84,30 @@ namespace Edcore.GanttChart
             m_Manager.SetField(hair, 6, "Good morning");
             m_Manager.SetField(pack, 6, "Good evening");
 
+            var job1 = new MyTask(m_Manager) { Name = "Job1" };
+            var job2 = new MyTask(m_Manager) { Name = "Job2" };
+            var job3 = new MyTask(m_Manager) { Name = "Brush Teeth" };
+            var job4 = new MyTask(m_Manager) { Name = "JOb4" };
+            var job5 = new MyTask(m_Manager) { Name = "JOb 5" };
+            var job6 = new MyTask(m_Manager) { Name = "job 6" };
+            var job7 = new MyTask(m_Manager) { Name = "end job" };
+
+            m_Manager.Add(job1);
+            m_Manager.Add(job2);
+            m_Manager.Add(job3);
+            m_Manager.Add(job4);
+            m_Manager.Add(job5);
+            m_Manager.Add(job6);
+            m_Manager.Add(job7);
+
+            m_Manager.SetField(job1, 6, "Hello");
+            m_Manager.SetField(job2, 6, "HI");
+            m_Manager.SetField(job3, 6, "hey");
+            m_Manager.SetField(job4, 6, "Yo");
+            m_Manager.SetField(job5, 6, "Greetings");
+            m_Manager.SetField(job6, 6, "Good morning");
+            m_Manager.SetField(job7, 6, "Good evening");
+
             //m_Manager.SetField(work, "Important", "Yes");
 
             // Create another 1000 tasks for stress testing
@@ -101,14 +127,25 @@ namespace Edcore.GanttChart
             m_Manager.SetDuration(clothes, TimeSpan.FromDays(4));
             m_Manager.SetDuration(hair, TimeSpan.FromDays(3));
             m_Manager.SetDuration(pack, TimeSpan.FromDays(5));
+            m_Manager.SetDuration(job2, TimeSpan.FromDays(3));
+            m_Manager.SetDuration(job3, TimeSpan.FromDays(5));
+            m_Manager.SetDuration(job4, TimeSpan.FromDays(7));
+            m_Manager.SetDuration(job5, TimeSpan.FromDays(4));
+            m_Manager.SetDuration(job6, TimeSpan.FromDays(3));
+            m_Manager.SetDuration(job7, TimeSpan.FromDays(5));
 
             // demostrate splitting a task
             m_Manager.Split(pack, new MyTask(m_Manager), new MyTask(m_Manager), TimeSpan.FromDays(2));
+            m_Manager.Split(job7, new MyTask(m_Manager), new MyTask(m_Manager), TimeSpan.FromDays(2));
 
             // Set task complete status, e.g. using newly created properties
             wake.Complete = 0.9f;
             teeth.Complete = 0.5f;
             shower.Complete = 0.4f;
+
+            job2.Complete = 0.9f;
+            job3.Complete = 0.5f;
+            job4.Complete = 0.4f;
 
             // Give the Tasks some organisation, setting group and precedents
             m_Manager.Group(work, wake);
@@ -123,6 +160,18 @@ namespace Edcore.GanttChart
             m_Manager.Relate(shower, hair);
             m_Manager.Relate(hair, pack);
             m_Manager.Relate(clothes, pack);
+            m_Manager.Group(job1, job2);
+            m_Manager.Group(job1, job3);
+            m_Manager.Group(job1, job4);
+            m_Manager.Group(job1, job5);
+            m_Manager.Group(job1, job6);
+            m_Manager.Group(job1, job7);
+            m_Manager.Relate(job2, job3);
+            m_Manager.Relate(job2, job4);
+            m_Manager.Relate(job4, job5);
+            m_Manager.Relate(job4, job6);
+            m_Manager.Relate(job6, job7);
+            m_Manager.Relate(job5, job7);
 
             // Create and assign Resources.
             // MyResource is just custom user class. The API can accept any object as resource.
@@ -133,16 +182,16 @@ namespace Edcore.GanttChart
             var james = new MyResource() { Name = "James" };
             var mary = new MyResource() { Name = "Mary" };
             // Add some resources
-            m_Manager.Assign(wake, jake);
-            m_Manager.Assign(wake, peter);
-            m_Manager.Assign(wake, john);
-            m_Manager.Assign(teeth, jake);
-            m_Manager.Assign(teeth, james);
-            m_Manager.Assign(pack, james);
-            m_Manager.Assign(pack, lucas);
-            m_Manager.Assign(shower, mary);
-            m_Manager.Assign(shower, lucas);
-            m_Manager.Assign(shower, john);
+            m_Manager.Assign(job2, jake);
+            m_Manager.Assign(job2, peter);
+            m_Manager.Assign(job2, john);
+            m_Manager.Assign(job3, jake);
+            m_Manager.Assign(job3, james);
+            m_Manager.Assign(job7, james);
+            m_Manager.Assign(job7, lucas);
+            m_Manager.Assign(job4, mary);
+            m_Manager.Assign(job4, lucas);
+            m_Manager.Assign(job4, john);
 
             // Build tasklist
             IEnumerable<Task> tasks = m_Manager.RootTasks;
@@ -176,6 +225,8 @@ namespace Edcore.GanttChart
             m_TaskList.CellEditValidating += new CellEditEventHandler(m_TaskList_CellEditValidating);
             m_TaskList.CellEditFinishing += new CellEditEventHandler(m_TaskList_CellEditFinishing);
             m_TaskList.Scroll += new EventHandler<ScrollEventArgs>(m_TaskList_Scroll);
+            m_TaskList.Expanding += new EventHandler<TreeBranchExpandingEventArgs>(m_TaskList_Expanding);
+            m_TaskList.Collapsing += new EventHandler<TreeBranchCollapsingEventArgs>(m_TaskList_Collapsing);
             m_TaskList.CellEditStarting += (sender, args) =>
             {
                 // Left align the edit control
@@ -191,6 +242,7 @@ namespace Edcore.GanttChart
 
             // Splitter event listeners
             m_SplitContainer.SplitterMoved += new SplitterEventHandler(m_SplitContainer_SplitterMoved);
+
 
             // Set some tooltips to show the resources in each task
             //_mChart.SetToolTip(wake, string.Join(", ", _mManager.ResourcesOf(wake).Select(x => (x as MyResource).Name)));
@@ -215,6 +267,41 @@ namespace Edcore.GanttChart
 
             // Init the rest of the UI
             _InitExampleUI();
+        }
+
+        private void m_TaskList_Collapsing(object sender, TreeBranchCollapsingEventArgs e)
+        {
+            if (searchMode)
+            {
+                e.Canceled = true;
+            }
+        }
+
+        private void m_TaskList_Expanding(object sender, TreeBranchExpandingEventArgs e)
+        {
+            if(searchMode)
+            {
+                e.Canceled = true;
+            }
+        }
+
+        private void SearchTextBox_LostFocus(object sender, EventArgs e)
+        {
+            if (m_SearchTextBox.Text.Length == 0)
+            {
+                searchMode = false;
+                m_SearchTextBox.Text = "Search...";
+            }
+        }
+
+        private void SearchTextBox_GotFocus(object sender, EventArgs e)
+        {
+            if (m_SearchTextBox.Text == "Search...")
+            {
+                searchMode = true;
+                m_SearchTextBox.Text = "";
+            }
+
         }
 
         private void m_SplitContainer_SplitterMoved(object sender, SplitterEventArgs e)
@@ -271,19 +358,25 @@ namespace Edcore.GanttChart
 
         private void m_TaskList_Collapsed(object sender, TreeBranchCollapsedEventArgs e)
         {
-            ((Task)e.Model).IsCollapsed = true;
+            Task task = (Task)e.Model;
+            task.IsCollapsed = true;
+
             m_Chart.Invalidate();
+
         }
 
         private void m_TaskList_Expanded(object sender, TreeBranchExpandedEventArgs e)
         {
-            ((Task)e.Model).IsCollapsed = false;
+            Task task = (Task)e.Model;
+            task.IsCollapsed = false;
+
             m_Chart.Invalidate();
+
         }
 
         private void m_Chart_TaskMouseDoubleClick(object sender, TaskMouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Left)
+            if (e.Button == MouseButtons.Left && !searchMode)
             {
                 // this check happens BEFORE IsCollapsed is toggled by double click
                 if (!e.Task.IsCollapsed)
@@ -984,59 +1077,59 @@ namespace Edcore.GanttChart
 
         private void searchTextBox_TextChanged(object sender, EventArgs e)
         {
-            //if (searchTextBox.Text.Length > 0)
-            //{
-            //    // Perform simple search
-            //    m_TaskList.ModelFilter = new ModelFilter(delegate (object x)
-            //    {
-            //        Task task = (Task)x;
-            //        task.IsFiltered = !_TaskContainsKeyword(task, searchTextBox.Text);
 
-            //        if (m_Manager.IsGroup(task))
-            //        {
-            //            task.IsFiltered = true;
-            //        }
-            //        else
-            //        {
-            //            // update parent's filtered
-            //            Task parent = task;
-            //            while (m_Manager.IsMember(parent))
-            //            {
-            //                parent = m_Manager.DirectGroupOf(task);
-            //                parent.IsFiltered = parent.IsFiltered && !task.IsFiltered;
-            //            }
-
-            //        }
-
-            //        return !task.IsFiltered;
-            //    });
-            //}
-            //else
-            //{
-            //    m_TaskList.ModelFilter = new ModelFilter(delegate (object x)
-            //    {
-            //        ((Task)x).IsFiltered = false;
-            //        return true;
-            //    });
-            //}
-
-            var filters = new List<IModelFilter>();
-            TextMatchFilter highlightingFilter = null;
-            if (!String.IsNullOrEmpty(searchTextBox.Text))
+            if (m_SearchTextBox.Focused)
             {
-                var words = searchTextBox.Text.Trim().Split(null);
-                highlightingFilter = TextMatchFilter.Contains(m_TaskList, words);
+                _SearchTasksWordsInTextBox();
+            }
+
+        }
+
+        private void _SearchTasksWordsInTextBox()
+        {
+            if (!m_SearchTextBox.Text.Equals("Search..."))
+            {
+                var filters = new List<IModelFilter>();
+                var words = m_SearchTextBox.Text.Trim().Split(null);
+                TextMatchFilter highlightingFilter = TextMatchFilter.Contains(m_TaskList, words); ;
+
                 foreach (var word in words)
                 {
                     var filter = TextMatchFilter.Contains(m_TaskList, word);
                     filters.Add(filter);
                 }
-            }
-            var compositeFilter = new CompositeAllFilter(filters);
 
-            m_TaskList.ModelFilter = highlightingFilter;
-            m_TaskList.AdditionalFilter = compositeFilter;
-            m_TaskList.DefaultRenderer = new HighlightTextRenderer(highlightingFilter);
+                var compositeFilter = new CompositeAllFilter(filters);
+
+                m_TaskList.ModelFilter = highlightingFilter;
+                m_TaskList.AdditionalFilter = compositeFilter;
+                m_TaskList.DefaultRenderer = new HighlightTextRenderer(highlightingFilter);
+
+                // Update isFiltered property for all tasks
+                foreach (Task task in m_Manager.Tasks)
+                {
+                    task.IsFiltered = !highlightingFilter.Filter(task);
+
+                    if (m_Manager.IsGroup(task))
+                    {
+                        task.IsFiltered = true;
+                    }
+                    else
+                    {
+                        // Update parent's filtered depending on its children
+                        Task parent = task;
+                        while (m_Manager.IsMember(parent))
+                        {
+                            parent = m_Manager.DirectGroupOf(task);
+
+                            if (!parent.IsCollapsed)
+                            {
+                                parent.IsFiltered = parent.IsFiltered && task.IsFiltered;
+                            }
+                        }
+                    }
+                }
+            }
 
             m_Chart.Invalidate();
         }
@@ -1181,27 +1274,23 @@ namespace Edcore.GanttChart
             return false;
         }
 
-        private bool _TaskContainsKeyword(Task task, string term)
+        private bool _TaskContainsKeywords(Task task, string term)
         {
-            if (task.Name.Contains(term) || task.Complete.ToString("p").Contains(term))
+            bool contains = false;
+            for (int i = 0; i < m_Manager.FieldCount; i++)
             {
-                return true;
-            }
-
-            foreach (string str in task.CustomFieldsData)
-            {
-                if (str == null)
+                foreach (string keyword in term.Trim().Split(null))
                 {
-                    continue;
-                }
+                    string data = m_Manager.GetFieldString(task, i);
 
-                if (str.Contains(str))
-                {
-                    return true;
+                    if (data != null)
+                    {
+                        contains = contains || CultureInfo.CurrentCulture.CompareInfo.IndexOf(data, term, CompareOptions.IgnoreCase) >= 0;
+                    }
                 }
             }
 
-            return false;
+            return contains;
         }
     }
 

@@ -104,7 +104,7 @@ namespace Edcore.GanttChart
             this.label2 = new System.Windows.Forms.Label();
             this._mTaskGrid = new System.Windows.Forms.PropertyGrid();
             this.quickButtonPanel = new System.Windows.Forms.Panel();
-            this.searchTextBox = new System.Windows.Forms.TextBox();
+            this.m_SearchTextBox = new System.Windows.Forms.TextBox();
             this._mRemoveButton = new System.Windows.Forms.Button();
             this._mAddButton = new System.Windows.Forms.Button();
             this.headerMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
@@ -760,7 +760,7 @@ namespace Edcore.GanttChart
             // 
             this.quickButtonPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.quickButtonPanel.BackColor = System.Drawing.SystemColors.Window;
-            this.quickButtonPanel.Controls.Add(this.searchTextBox);
+            this.quickButtonPanel.Controls.Add(this.m_SearchTextBox);
             this.quickButtonPanel.Controls.Add(this._mRemoveButton);
             this.quickButtonPanel.Controls.Add(this._mAddButton);
             this.quickButtonPanel.Location = new System.Drawing.Point(927, 0);
@@ -768,19 +768,21 @@ namespace Edcore.GanttChart
             this.quickButtonPanel.Size = new System.Drawing.Size(357, 24);
             this.quickButtonPanel.TabIndex = 10;
             // 
-            // searchTextBox
+            // m_SearchTextBox
             // 
-            this.searchTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.m_SearchTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.searchTextBox.Location = new System.Drawing.Point(0, 0);
-            this.searchTextBox.MaxLength = 30;
-            this.searchTextBox.Name = "searchTextBox";
-            this.searchTextBox.Size = new System.Drawing.Size(173, 23);
-            this.searchTextBox.TabIndex = 0;
-            this.searchTextBox.Text = "Search...";
-            this.searchTextBox.WordWrap = false;
-            this.searchTextBox.TextChanged += new System.EventHandler(this.searchTextBox_TextChanged);
+            this.m_SearchTextBox.Location = new System.Drawing.Point(0, 0);
+            this.m_SearchTextBox.MaxLength = 30;
+            this.m_SearchTextBox.Name = "m_SearchTextBox";
+            this.m_SearchTextBox.Size = new System.Drawing.Size(173, 23);
+            this.m_SearchTextBox.TabIndex = 0;
+            this.m_SearchTextBox.Text = "Search...";
+            this.m_SearchTextBox.WordWrap = false;
+            this.m_SearchTextBox.TextChanged += new System.EventHandler(this.searchTextBox_TextChanged);
+            this.m_SearchTextBox.GotFocus += new System.EventHandler(this.SearchTextBox_GotFocus);
+            this.m_SearchTextBox.LostFocus += new System.EventHandler(this.SearchTextBox_LostFocus);
             // 
             // _mRemoveButton
             // 
@@ -1035,7 +1037,7 @@ namespace Edcore.GanttChart
         private System.Windows.Forms.SplitContainer m_SplitContainer;
         private System.Windows.Forms.Label projectTitleLabel;
         private BrightIdeasSoftware.TreeListView m_TaskList;
-        private System.Windows.Forms.TextBox searchTextBox;
+        private System.Windows.Forms.TextBox m_SearchTextBox;
     }
 }
 
