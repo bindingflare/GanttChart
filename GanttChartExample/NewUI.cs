@@ -22,8 +22,10 @@ namespace Edcore.GanttChart
         ProjectManager m_Manager = null;
         Form taskForm = null;
 
-        private int scrollFix = 0;
-        private bool searchMode = false;
+        private int _scrollFix = 0;
+        private bool _searchMode = false;
+        private Task m_SelectedTask;
+        private OLVColumn m_SelectedTaskColumn;
 
         /// <summary>
         /// Example starts here
@@ -160,6 +162,7 @@ namespace Edcore.GanttChart
             m_Manager.Relate(shower, hair);
             m_Manager.Relate(hair, pack);
             m_Manager.Relate(clothes, pack);
+
             m_Manager.Group(job1, job2);
             m_Manager.Group(job1, job3);
             m_Manager.Group(job1, job4);
@@ -181,6 +184,7 @@ namespace Edcore.GanttChart
             var lucas = new MyResource() { Name = "Lucas" };
             var james = new MyResource() { Name = "James" };
             var mary = new MyResource() { Name = "Mary" };
+
             // Add some resources
             m_Manager.Assign(job2, jake);
             m_Manager.Assign(job2, peter);
@@ -227,6 +231,8 @@ namespace Edcore.GanttChart
             m_TaskList.Scroll += new EventHandler<ScrollEventArgs>(m_TaskList_Scroll);
             m_TaskList.Expanding += new EventHandler<TreeBranchExpandingEventArgs>(m_TaskList_Expanding);
             m_TaskList.Collapsing += new EventHandler<TreeBranchCollapsingEventArgs>(m_TaskList_Collapsing);
+            m_TaskList.ColumnClick += new ColumnClickEventHandler(m_Tasklist_ColumnRightClick);
+            m_TaskList.CellRightClick += new EventHandler<CellRightClickEventArgs>(m_TaskList_CellRightClick);
             m_TaskList.CellEditStarting += (sender, args) =>
             {
                 // Left align the edit control
@@ -269,9 +275,62 @@ namespace Edcore.GanttChart
             _InitExampleUI();
         }
 
+        private void m_Tasklist_ColumnRightClick(object sender, ColumnClickEventArgs e)
+        {
+            ToolStripDropDown toolstrip = new ToolStripDropDown();
+            m_TaskList.MakeColumnCommandMenu(toolstrip, e.Column);
+
+            int x = 0;
+            int fullWidth = 0;
+            foreach (OLVColumn column in m_TaskList.Columns)
+            {
+                if (column.Index == e.Column)
+                {
+                    x = fullWidth;
+                }
+
+                fullWidth += column.Width;
+            }
+
+            x = x - m_TaskList.LowLevelScrollPosition.X;
+            toolstrip.Items[2].Click += NewUI_Click; ;
+            toolstrip.Show(m_TaskList, x, m_Chart.HeaderTwoHeight);
+        }
+
+        private void NewUI_Click(object sender, EventArgs e)
+        {
+            m_TaskList.Roots = m_Manager.RootTasks;
+        }
+
+        private void m_TaskList_CellRightClick(object sender, CellRightClickEventArgs e)
+        {
+            taskMenuStrip.Show(m_TaskList, e.Location);
+            m_SelectedTask = (Task)e.Model;
+            m_SelectedTaskColumn = e.Column;
+        }
+
+        private void m_TaskList_Filter(object sender, FilterEventArgs e)
+        {
+            IEnumerable<Task> tasks = (IEnumerable<Task>)e.Objects;
+
+            foreach (object obj in e.Objects)
+            {
+                Task task = (Task)obj;
+
+                if (tasks.Contains(task))
+                {
+                    task.IsFiltered = false;
+                }
+                else
+                {
+                    task.IsFiltered = true;
+                }
+            }
+        }
+
         private void m_TaskList_Collapsing(object sender, TreeBranchCollapsingEventArgs e)
         {
-            if (searchMode)
+            if (_searchMode)
             {
                 e.Canceled = true;
             }
@@ -279,7 +338,7 @@ namespace Edcore.GanttChart
 
         private void m_TaskList_Expanding(object sender, TreeBranchExpandingEventArgs e)
         {
-            if(searchMode)
+            if (_searchMode)
             {
                 e.Canceled = true;
             }
@@ -289,7 +348,7 @@ namespace Edcore.GanttChart
         {
             if (m_SearchTextBox.Text.Length == 0)
             {
-                searchMode = false;
+                _searchMode = false;
                 m_SearchTextBox.Text = "Search...";
             }
         }
@@ -298,7 +357,7 @@ namespace Edcore.GanttChart
         {
             if (m_SearchTextBox.Text == "Search...")
             {
-                searchMode = true;
+                _searchMode = true;
                 m_SearchTextBox.Text = "";
             }
 
@@ -376,7 +435,7 @@ namespace Edcore.GanttChart
 
         private void m_Chart_TaskMouseDoubleClick(object sender, TaskMouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Left && !searchMode)
+            if (e.Button == MouseButtons.Left && !_searchMode)
             {
                 // this check happens BEFORE IsCollapsed is toggled by double click
                 if (!e.Task.IsCollapsed)
@@ -394,10 +453,10 @@ namespace Edcore.GanttChart
         {
             if (e.ScrollOrientation == ScrollOrientation.VerticalScroll)
             {
-                m_Chart.Viewport.Y = (e.NewValue + scrollFix) * m_Chart.BarSpacing;
+                m_Chart.Viewport.Y = (e.NewValue + _scrollFix) * m_Chart.BarSpacing;
             }
 
-            scrollFix = 0;
+            _scrollFix = 0;
         }
 
         private void _mChart_MouseWheel(object sender, MouseEventArgs e)
@@ -406,12 +465,12 @@ namespace Edcore.GanttChart
             if (e.Delta > 0)
             {
                 delta = -m_Chart.Viewport.WheelDelta;
-                scrollFix = -1;
+                _scrollFix = -1;
             }
             else
             {
                 delta = m_Chart.Viewport.WheelDelta;
-                scrollFix = 1;
+                _scrollFix = 1;
             }
 
             m_TaskList.LowLevelScroll(0, delta);
@@ -887,8 +946,17 @@ namespace Edcore.GanttChart
 
         private void editFieldToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            int index = 0; //m_Tasklist.SelectedFieldIndex;
-            var task = m_Chart.SelectedTask;
+            int index = 0;
+            foreach (OLVColumn column in m_TaskList.AllColumns)
+            {
+                if (column == m_SelectedTaskColumn)
+                {
+                    break;
+                }
+
+                index++;
+            }
+            var task = m_SelectedTask;
 
             string fieldName = m_Manager.HeaderList[index].Title;
             string data = m_Manager.GetFieldString(task, index);
@@ -940,20 +1008,29 @@ namespace Edcore.GanttChart
             }
 
             m_Chart.Invalidate();
-            //m_Tasklist.Invalidate();
+            m_TaskList.Invalidate();
         }
 
         private void addChildToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (!m_Manager.IsSplit(m_Chart.SelectedTask))
+            if (!m_Manager.IsSplit(m_SelectedTask))
             {
                 Task newTask = new MyTask(m_Manager);
-                newTask.Name = "Child of " + m_Chart.SelectedTask.Name;
+                newTask.Name = "Child of " + m_SelectedTask.Name;
                 m_Manager.Add(newTask);
-                m_Manager.SetStart(newTask, m_Chart.SelectedTask.Start);
-                m_Manager.SetDuration(newTask, m_Chart.SelectedTask.Duration);
+                m_Manager.SetStart(newTask, m_SelectedTask.Start);
+                m_Manager.SetDuration(newTask, m_SelectedTask.Duration);
 
-                m_Manager.Group(m_Chart.SelectedTask, newTask);
+                m_Manager.Group(m_SelectedTask, newTask);
+
+                // Set properties for tasklist
+                m_SelectedTask.CanExpand = true;
+                m_SelectedTask.Children = m_Manager.MembersOf(m_SelectedTask);
+                m_TaskList.Expand(m_SelectedTask);
+
+                m_Chart.Invalidate();
+                m_TaskList.RebuildAll(true);
+                //m_TaskList.ExpandAll();
             }
             else
             {
@@ -965,15 +1042,17 @@ namespace Edcore.GanttChart
         {
             if (MessageBox.Show("Press OK to confirm", "Delete task", MessageBoxButtons.OKCancel) == System.Windows.Forms.DialogResult.OK)
             {
-                m_Manager.Delete(m_Chart.SelectedTask);
+                m_Manager.Delete(m_SelectedTask);
+
+                m_TaskList.Roots = m_Manager.RootTasks;
+
                 m_Chart.Invalidate();
-                //m_Tasklist.Invalidate();
             }
         }
 
         private void mergeToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            m_Manager.Merge(m_Chart.SelectedTask);
+            m_Manager.Merge(m_SelectedTask);
         }
 
         private void splitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -987,14 +1066,16 @@ namespace Edcore.GanttChart
             //    _mManager.Split(_mChart.SelectedTask, , );
             //}
 
-            var parts = m_Manager.PartsOf(m_Chart.SelectedTask);
+            var parts = m_Manager.PartsOf(m_SelectedTask);
             int splitTasks = parts.Count() - 1;
 
 
             if (splitTasks > 0)
                 m_Manager.Split(parts.First(), new MyTask(m_Manager), new TimeSpan(parts.First().Duration.Ticks / 2 ^ (splitTasks - 1)));
             else
-                m_Manager.Split(m_Chart.SelectedTask, new MyTask(m_Manager), new MyTask(m_Manager), new TimeSpan(m_Chart.SelectedTask.Duration.Ticks / 2));
+                m_Manager.Split(m_SelectedTask, new MyTask(m_Manager), new MyTask(m_Manager), new TimeSpan(m_SelectedTask.Duration.Ticks / 2));
+
+            m_Chart.Invalidate();
         }
 
         private void editProjectToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1005,7 +1086,7 @@ namespace Edcore.GanttChart
                 m_Manager.Name = result;
                 projectTitleLabel.Text = result;
                 m_Chart.Invalidate();
-                //m_Tasklist.Invalidate();
+                m_TaskList.Invalidate();
             }
 
         }
@@ -1089,42 +1170,54 @@ namespace Edcore.GanttChart
         {
             if (!m_SearchTextBox.Text.Equals("Search..."))
             {
-                var filters = new List<IModelFilter>();
-                var words = m_SearchTextBox.Text.Trim().Split(null);
-                TextMatchFilter highlightingFilter = TextMatchFilter.Contains(m_TaskList, words); ;
-
-                foreach (var word in words)
+                if (m_SearchTextBox.Text.Length == 0)
                 {
-                    var filter = TextMatchFilter.Contains(m_TaskList, word);
-                    filters.Add(filter);
-                }
-
-                var compositeFilter = new CompositeAllFilter(filters);
-
-                m_TaskList.ModelFilter = highlightingFilter;
-                m_TaskList.AdditionalFilter = compositeFilter;
-                m_TaskList.DefaultRenderer = new HighlightTextRenderer(highlightingFilter);
-
-                // Update isFiltered property for all tasks
-                foreach (Task task in m_Manager.Tasks)
-                {
-                    task.IsFiltered = !highlightingFilter.Filter(task);
-
-                    if (m_Manager.IsGroup(task))
+                    foreach (Task task in m_Manager.Tasks)
                     {
-                        task.IsFiltered = true;
+                        task.IsFiltered = false;
                     }
-                    else
-                    {
-                        // Update parent's filtered depending on its children
-                        Task parent = task;
-                        while (m_Manager.IsMember(parent))
-                        {
-                            parent = m_Manager.DirectGroupOf(task);
 
-                            if (!parent.IsCollapsed)
+                    m_TaskList.ModelFilter = null;
+                }
+                else
+                {
+                    var filters = new List<IModelFilter>();
+                    var words = m_SearchTextBox.Text.Trim().Split(null);
+                    TextMatchFilter highlightingFilter = TextMatchFilter.Contains(m_TaskList, words); ;
+
+                    foreach (var word in words)
+                    {
+                        var filter = TextMatchFilter.Contains(m_TaskList, word);
+                        filters.Add(filter);
+                    }
+
+                    var compositeFilter = new CompositeAllFilter(filters);
+
+                    m_TaskList.ModelFilter = highlightingFilter;
+                    m_TaskList.AdditionalFilter = compositeFilter;
+                    m_TaskList.DefaultRenderer = new HighlightTextRenderer(highlightingFilter);
+
+                    // Update isFiltered property for all tasks
+                    foreach (Task task in m_Manager.Tasks)
+                    {
+                        task.IsFiltered = !highlightingFilter.Filter(task);
+
+                        if (m_Manager.IsGroup(task))
+                        {
+                            task.IsFiltered = true;
+                        }
+                        else
+                        {
+                            // Update parent's filtered depending on its children
+                            Task parent = task;
+                            while (m_Manager.IsMember(parent))
                             {
-                                parent.IsFiltered = parent.IsFiltered && task.IsFiltered;
+                                parent = m_Manager.DirectGroupOf(parent);
+
+                                if (!parent.IsCollapsed)
+                                {
+                                    parent.IsFiltered = parent.IsFiltered && task.IsFiltered;
+                                }
                             }
                         }
                     }
@@ -1136,11 +1229,13 @@ namespace Edcore.GanttChart
 
         private void _registerCustomField(string fieldName, string type, float fieldSize)
         {
+            // Add field to projectmanager
             m_Manager.AddCustomField(fieldName, type, fieldSize);
 
             int index = m_Manager.FieldCount - 1;
             Header header = m_Manager.HeaderList[index];
 
+            // Add field to tasklist
             OLVColumn columnHeader = new OLVColumn();
 
             columnHeader.DisplayIndex = index;
@@ -1292,6 +1387,34 @@ namespace Edcore.GanttChart
 
             return contains;
         }
+
+        private void showAllHeadersToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (OLVColumn column in m_TaskList.AllColumns)
+            {
+                column.IsVisible = true;
+            }
+
+            m_TaskList.RebuildColumns();
+            //m_TaskList.Invalidate();
+        }
+
+        private void editFieldToolStripMenuItem_Click_1(object sender, EventArgs e)
+        {
+            int input;
+            if (_promptList("Select a field to edit", "Edit custom field", m_Manager.GetHeaderNames(), out input))
+            {
+                string header = m_Manager.HeaderList[input].Title;
+
+                string input2;
+                if (_promptString("Change name of header [" + header + "] to:", "Edit header", header, "Task name cannot be empty", out input2))
+                {
+                    m_Manager.HeaderList[input].Title = input2;
+                    m_TaskList.AllColumns[input].Text = input2;
+                    m_TaskList.RebuildColumns();
+                }
+            }
+        }
     }
 
     #region overlay painter
@@ -1400,4 +1523,6 @@ namespace Edcore.GanttChart
         }
     }
     #endregion custom task and resource
+
+
 }

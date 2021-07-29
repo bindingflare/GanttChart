@@ -51,8 +51,8 @@ namespace Edcore.GanttChart
             Name = projectName;
 
             // Add default headers
-            HeaderList.Add(new Header("Name", "tree", 1, 200f));
-            HeaderList.Add(new Header("ID", "string", 0, 60f, false, true));
+            HeaderList.Add(new Header("Name", "tree", 0, 200f));
+            HeaderList.Add(new Header("ID", "string", 1, 60f, false, true));
             HeaderList.Add(new Header("Start", "date", 2, 125f));
             HeaderList.Add(new Header("End", "date", 3, 125f));
             HeaderList.Add(new Header("Duration", "time", 4, 80f));
@@ -1165,9 +1165,9 @@ namespace Edcore.GanttChart
             switch (index)
             {
                 case 0:
-                    return task.ID;
-                case 1:
                     return task.Name;
+                case 1:
+                    return task.ID;
                 case 2:
                     return GetDateTime(task.Start);
                 case 3:
@@ -1186,9 +1186,9 @@ namespace Edcore.GanttChart
             switch (index)
             {
                 case 0:
-                    return task.ID;
-                case 1:
                     return task.Name;
+                case 1:
+                    return task.ID;
                 case 2:
                     return GetDateTime(task.Start).ToString("yyyy.MM.dd hh:mm:ss");
                 case 3:
