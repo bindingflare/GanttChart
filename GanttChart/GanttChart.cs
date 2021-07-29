@@ -250,6 +250,11 @@ namespace Edcore.GanttChart
         /// <summary>
         /// Occurs when a Task is being dragged by the mouse
         /// </summary>
+        public event EventHandler<MousePanEventArgs> MousePan = null;
+
+        /// <summary>
+        /// Occurs when a Task is being dragged by the mouse
+        /// </summary>
         public event EventHandler<TaskDragDropEventArgs> TaskMouseDrag = null;
 
         /// <summary>
@@ -633,6 +638,8 @@ namespace Edcore.GanttChart
                 Viewport.Y -= distanceY;
                 _mPanViewLastLocation = e.Location;
 
+                this.Invalidate();
+
                 //// Call scroll event
                 //if(distanceY < 0)
                 //    OnScroll(new ScrollEventArgs(ScrollEventType.SmallDecrement, (int) distanceY, ScrollOrientation.VerticalScroll));
@@ -674,6 +681,7 @@ namespace Edcore.GanttChart
             // Begin Drag
             _mDragTaskStartLocation = e.Location;
             _mDragTaskLastLocation = e.Location;
+            _mPanViewStartLocation = e.Location;
             _mPanViewLastLocation = e.Location;
 
             if (AllowTaskDragDrop)
@@ -705,6 +713,12 @@ namespace Edcore.GanttChart
         {
             // reset cursor to handle end of panning mode;
             this.Cursor = Cursors.Default;
+
+            // Complete mouse panning
+            if(_mPanViewStartLocation != _mPanViewLastLocation)
+            {
+                OnMousePan(new MousePanEventArgs(_mPanViewStartLocation, _mPanViewLastLocation, e.Button, e.Clicks, e.X, e.Y, e.Delta));
+            }
 
             // Drop task
             if (AllowTaskDragDrop && _mDraggedTask != null)
@@ -781,8 +795,18 @@ namespace Edcore.GanttChart
             _mOverlay.HideToolTip();
             this.Invalidate();
         }
+
         /// <summary>
-        /// Raises the TaskMouseDrag( event
+        /// Raises the OnMousePan event
+        /// </summary>
+        /// <param name="e"></param>
+        protected virtual void OnMousePan(MousePanEventArgs e)
+        {
+            MousePan?.Invoke(this, e);
+        }
+
+        /// <summary>
+        /// Raises the TaskMouseDrag event
         /// </summary>
         /// <param name="e"></param>
         protected virtual void OnTaskMouseDrag(TaskDragDropEventArgs e)
@@ -1705,6 +1729,7 @@ namespace Edcore.GanttChart
         Point _mDragTaskLastLocation = Point.Empty; // Record the task dragging mouse offset
         Point _mDragTaskStartLocation = Point.Empty;
         Point _mPanViewLastLocation = Point.Empty;
+        Point _mPanViewStartLocation = Point.Empty;
         List<Task> _mSelectedTasks = new List<Task>(); // List of selected tasks
         Dictionary<Task, RectangleF> _mChartTaskHitRects = new Dictionary<Task, RectangleF>(); // list of hitareas for Task Rectangles
         Dictionary<Task, RectangleF> _mChartTaskRects = new Dictionary<Task, RectangleF>();
@@ -1830,6 +1855,30 @@ namespace Edcore.GanttChart
         {
             this.Task = task;
             this.Rectangle = rectangle;
+        }
+    }
+
+    /// <summary>
+    /// Provides data for TaskDragDropEvent
+    /// </summary>
+    public class MousePanEventArgs : MouseEventArgs
+    {
+        /// <summary>
+        /// Get the previous mouse location
+        /// </summary>
+        public Point PreviousLocation { get; private set; }
+        /// <summary>
+        /// Get the starting mouse location of this drag drop event
+        /// </summary>
+        public Point StartLocation { get; private set; }
+        /// <summary>
+        /// Initialize a new instance of TaskDragDropEventArgs with the MouseEventArgs parameters and the Task involved and the previous mouse location.
+        /// </summary>
+        public MousePanEventArgs(Point startLocation, Point prevLocation, MouseButtons buttons, int clicks, int x, int y, int delta)
+            : base(buttons, clicks, x, y, delta)
+        {
+            this.PreviousLocation = prevLocation;
+            this.StartLocation = startLocation;
         }
     }
 

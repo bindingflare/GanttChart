@@ -23,6 +23,7 @@ namespace Edcore.GanttChart
         Form taskForm = null;
 
         private int _scrollFix = 0;
+        private bool isPanning = false;
         private bool _searchMode = false;
         private Task m_SelectedTask;
         private OLVColumn m_SelectedTaskColumn;
@@ -220,8 +221,9 @@ namespace Edcore.GanttChart
             _mOverlay.PrintMode = true;
             m_Chart.PaintOverlay += _mOverlay.ChartOverlayPainter;
             m_Chart.AllowTaskDragDrop = true;
-            //m_Chart.Scroll += new ScrollEventHandler(_mChart_Scroll);
-            m_Chart.MouseWheel += new MouseEventHandler(_mChart_MouseWheel);
+            //m_Chart.Scroll += new ScrollEventHandler(m_Chart_Scroll);
+            m_Chart.MouseWheel += new MouseEventHandler(m_Chart_MouseWheel);
+            m_Chart.MousePan += new EventHandler<MousePanEventArgs>(m_Chart_MousePan);
 
             // Tasklist event listeners
             m_TaskList.Expanded += new EventHandler<TreeBranchExpandedEventArgs>(m_TaskList_Expanded);
@@ -273,6 +275,14 @@ namespace Edcore.GanttChart
 
             // Init the rest of the UI
             _InitExampleUI();
+        }
+
+        private void m_Chart_MousePan(object sender, MousePanEventArgs e)
+        {
+            // Prevent tasklist's Scroll event from mixing with panning functionality
+            isPanning = true;
+            m_TaskList.LowLevelScroll(0, e.StartLocation.Y - e.PreviousLocation.Y);
+            isPanning = false;
         }
 
         private void m_Tasklist_ColumnRightClick(object sender, ColumnClickEventArgs e)
@@ -451,7 +461,7 @@ namespace Edcore.GanttChart
 
         private void m_TaskList_Scroll(object sender, ScrollEventArgs e)
         {
-            if (e.ScrollOrientation == ScrollOrientation.VerticalScroll)
+            if (e.ScrollOrientation == ScrollOrientation.VerticalScroll && !isPanning)
             {
                 m_Chart.Viewport.Y = (e.NewValue + _scrollFix) * m_Chart.BarSpacing;
             }
@@ -459,7 +469,7 @@ namespace Edcore.GanttChart
             _scrollFix = 0;
         }
 
-        private void _mChart_MouseWheel(object sender, MouseEventArgs e)
+        private void m_Chart_MouseWheel(object sender, MouseEventArgs e)
         {
             int delta;
             if (e.Delta > 0)

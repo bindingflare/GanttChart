@@ -437,21 +437,21 @@ namespace Edcore.GanttChart
             // createCustomFieldToolStripMenuItem
             // 
             this.createCustomFieldToolStripMenuItem.Name = "createCustomFieldToolStripMenuItem";
-            this.createCustomFieldToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.createCustomFieldToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
             this.createCustomFieldToolStripMenuItem.Text = "New...";
             this.createCustomFieldToolStripMenuItem.Click += new System.EventHandler(this.createCustomFieldToolStripMenuItem_Click);
             // 
             // deleteCustomFieldToolStripMenuItem
             // 
             this.deleteCustomFieldToolStripMenuItem.Name = "deleteCustomFieldToolStripMenuItem";
-            this.deleteCustomFieldToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.deleteCustomFieldToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
             this.deleteCustomFieldToolStripMenuItem.Text = "Delete...";
             this.deleteCustomFieldToolStripMenuItem.Click += new System.EventHandler(this.deleteCustomFieldToolStripMenuItem_Click);
             // 
             // editFieldToolStripMenuItem
             // 
             this.editFieldToolStripMenuItem.Name = "editFieldToolStripMenuItem";
-            this.editFieldToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.editFieldToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
             this.editFieldToolStripMenuItem.Text = "Edit Field...";
             this.editFieldToolStripMenuItem.Click += new System.EventHandler(this.editFieldToolStripMenuItem_Click_1);
             // 
