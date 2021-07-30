@@ -58,9 +58,10 @@ namespace Edcore.GanttChart
             HeaderList.Add(new Header("End", "date", 3, 125f));
             HeaderList.Add(new Header("Duration", "time", 4, 80f));
             HeaderList.Add(new Header("Complete", "string", 5, 60f, true, true));
+            HeaderList.Add(new Header("Delay", "string", 6, 80f));
 
-            FieldCount = 6;
-            MainFieldCount = 6;
+            FieldCount = 7;
+            MainFieldCount = 7;
         }
 
         /// <summary>
@@ -1177,6 +1178,8 @@ namespace Edcore.GanttChart
                     return task.Duration;
                 case 5:
                     return task.Complete;
+                case 6:
+                    return task.Delay;
                 default:
                     return task.CustomFieldsData[index - MainFieldCount];
             }
@@ -1247,6 +1250,18 @@ namespace Edcore.GanttChart
         }
 
         /// <summary>
+        /// Set a field's data using field header
+        /// </summary>
+        /// <param name="task"></param>
+        /// <param name="index">Field index</param>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public bool SetField(T task, Header header, string data)
+        {
+            return SetField(task, header.Index, data);
+        }
+
+        /// <summary>
         /// Set a field's data using field index
         /// </summary>
         /// <param name="task"></param>
@@ -1292,6 +1307,9 @@ namespace Edcore.GanttChart
                 case 4:
                     SetDuration(task, data);
                     break;
+                case 6:
+                    SetDelay(task, data);
+                    break;
                 default:
                     // Custom field
                     return false; // TODO: Allow more forms of cu
@@ -1299,6 +1317,11 @@ namespace Edcore.GanttChart
             }
 
             return true;
+        }
+
+        private void SetDelay(T task, TimeSpan data)
+        {
+            task.Delay = data;
         }
 
         public int GetFieldIndex(string name) // warning: for fields with duplicate names, can cause unwanted behavior

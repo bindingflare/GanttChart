@@ -32,10 +32,7 @@ namespace Edcore.GanttChart
         /// <summary>
         /// Get or set the Name of this Task
         /// </summary>
-        [OLVColumn(Width = 200)]
         public string Name { get; set; }
-
-
 
         /// <summary>
         /// Get or set the pecentage complete of this task, expressed in float between 0.0 and 1.0f.
@@ -45,19 +42,16 @@ namespace Edcore.GanttChart
         /// <summary>
         /// Get the start time of this Task relative to the project start
         /// </summary>
-        [OLVColumn(Width = 120, AspectToStringFormat = "{0:G}")]
         public TimeSpan Start { get; internal set; }
 
         /// <summary>
         /// Get the end time of this Task relative to the project start
         /// </summary>
-        [OLVColumn(Width = 120, AspectToStringFormat = "{0:G}")]
         public TimeSpan End { get; internal set; }
 
         /// <summary>
         /// Get the duration of this Task in days
         /// </summary>
-        [OLVColumn(Width = 120, AspectToStringFormat = "{0:G}")]
         public TimeSpan Duration { get; internal set; }
 
         /// <summary>
@@ -66,9 +60,13 @@ namespace Edcore.GanttChart
         public TimeSpan Slack { get; internal set; }
 
         /// <summary>
+        /// Get the delay of this task in days
+        /// </summary>
+        public TimeSpan Delay { get; internal set; }
+
+        /// <summary>
         /// Get or set user defined fields data of task
         /// </summary>
-        [OLVColumn(Width = 100)]
         public string[] CustomFieldsData { get; internal set; }
 
         public string getCustomFieldData(int index)

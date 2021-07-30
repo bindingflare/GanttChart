@@ -618,7 +618,7 @@ namespace Edcore.GanttChart
             this._mTaskTreeView.Dock = System.Windows.Forms.DockStyle.Fill;
             this._mTaskTreeView.Location = new System.Drawing.Point(3, 3);
             this._mTaskTreeView.Name = "_mTaskTreeView";
-            this._mTaskTreeView.Size = new System.Drawing.Size(270, 566);
+            this._mTaskTreeView.Size = new System.Drawing.Size(270, 568);
             this._mTaskTreeView.TabIndex = 0;
             this._mTaskTreeView.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this._mTaskTreeView_AfterSelect);
             // 
@@ -700,7 +700,7 @@ namespace Edcore.GanttChart
             this._mResourceGrid.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this._mResourceGrid.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.colName});
-            this._mResourceGrid.Location = new System.Drawing.Point(3, 217);
+            this._mResourceGrid.Location = new System.Drawing.Point(3, 191);
             this._mResourceGrid.Name = "_mResourceGrid";
             this._mResourceGrid.Size = new System.Drawing.Size(226, 164);
             this._mResourceGrid.TabIndex = 4;
@@ -750,7 +750,7 @@ namespace Edcore.GanttChart
             // 
             this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(3, 202);
+            this.label2.Location = new System.Drawing.Point(3, 176);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(76, 15);
             this.label2.TabIndex = 1;
@@ -763,7 +763,7 @@ namespace Edcore.GanttChart
             this._mTaskGrid.LineColor = System.Drawing.SystemColors.ControlDark;
             this._mTaskGrid.Location = new System.Drawing.Point(3, 3);
             this._mTaskGrid.Name = "_mTaskGrid";
-            this._mTaskGrid.Size = new System.Drawing.Size(226, 198);
+            this._mTaskGrid.Size = new System.Drawing.Size(226, 172);
             this._mTaskGrid.TabIndex = 3;
             // 
             // quickButtonPanel
@@ -875,13 +875,13 @@ namespace Edcore.GanttChart
             this.m_TaskList.CellPadding = new System.Drawing.Rectangle(0, 0, 0, 0);
             this.m_TaskList.EmptyListMsg = "(List is empty)";
             this.m_TaskList.EmptyListMsgFont = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.m_TaskList.Location = new System.Drawing.Point(0, 32);
+            this.m_TaskList.Location = new System.Drawing.Point(3, 32);
             this.m_TaskList.Margin = new System.Windows.Forms.Padding(0);
             this.m_TaskList.Name = "m_TaskList";
             this.m_TaskList.SelectedBackColor = System.Drawing.SystemColors.ControlText;
             this.m_TaskList.SelectedColumnTint = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(180)))), ((int)(((byte)(180)))), ((int)(((byte)(180)))));
             this.m_TaskList.ShowGroups = false;
-            this.m_TaskList.Size = new System.Drawing.Size(428, 648);
+            this.m_TaskList.Size = new System.Drawing.Size(425, 648);
             this.m_TaskList.TabIndex = 1;
             this.m_TaskList.UseAlternatingBackColors = true;
             this.m_TaskList.UseCompatibleStateImageBehavior = false;

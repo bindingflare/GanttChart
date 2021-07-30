@@ -1236,6 +1236,7 @@ namespace Edcore.GanttChart
             _mChartTaskRects.Clear();
             _mChartTaskHitRects.Clear();
             _mChartSlackRects.Clear();
+            _mChartDelayRects.Clear();
             _mChartTaskPartRects.Clear();
 
             var pHeight = this.Parent == null ? this.Height : this.Parent.Height;
@@ -1273,11 +1274,23 @@ namespace Edcore.GanttChart
                             _mChartTaskHitRects.Add(part, taskRect);
                         }
                     }
+                    float xCoord = GetSpan(task.End);
+
+                    // Compute Delay Rectangles
+                    if (task.Delay.Ticks != 0)
+                    {
+                        float span = GetSpan(task.Delay);
+
+                        var slackRect = new RectangleF(xCoord, yCoord, span, this.BarHeight);
+                        _mChartDelayRects.Add(task, slackRect);
+
+                        xCoord += span;
+                    }
 
                     // Compute Slack Rectangles
                     if (this.ShowSlack)
                     {
-                        var slackRect = new RectangleF(GetSpan(task.End), yCoord, GetSpan(task.Slack), this.BarHeight);
+                        var slackRect = new RectangleF(xCoord, yCoord, GetSpan(task.Slack), this.BarHeight);
                         _mChartSlackRects.Add(task, slackRect);
                     }
 
@@ -1516,6 +1529,14 @@ namespace Edcore.GanttChart
                         }
                     }
 
+                    // Draw delay
+                    if (_mChartDelayRects.ContainsKey(task))
+                    {
+                        var delayrect = _mChartDelayRects[task];
+                        graphics.FillRectangle(Brushes.PaleVioletRed, delayrect);
+                        graphics.DrawRectangle(e.Format.Border, delayrect);
+                    }
+
                     // Write completion % text
                     if (showCompletionLabels)
                     {
@@ -1527,7 +1548,6 @@ namespace Edcore.GanttChart
                             graphics.DrawString(completion, e.Font, e.Format.Color, compRect);
                         }
                     }
-
 
                     // Draw slack
                     if (this.ShowSlack && task.Complete < 1.0f)
@@ -1735,6 +1755,7 @@ namespace Edcore.GanttChart
         Dictionary<Task, RectangleF> _mChartTaskRects = new Dictionary<Task, RectangleF>();
         Dictionary<Task, List<KeyValuePair<Task, RectangleF>>> _mChartTaskPartRects = new Dictionary<Task, List<KeyValuePair<Task, RectangleF>>>();
         Dictionary<Task, RectangleF> _mChartSlackRects = new Dictionary<Task, RectangleF>();
+        Dictionary<Task, RectangleF> _mChartDelayRects = new Dictionary<Task, RectangleF>();
         HeaderInfo _mHeaderInfo = new HeaderInfo();
         Task _mBarMouseEntered = null; // flag whether the mouse has entered a hitbox of a task or not
         Dictionary<Task, string> _mTaskToolTip = new Dictionary<Task, string>();
