@@ -618,7 +618,7 @@ namespace Edcore.GanttChart
             this._mTaskTreeView.Dock = System.Windows.Forms.DockStyle.Fill;
             this._mTaskTreeView.Location = new System.Drawing.Point(3, 3);
             this._mTaskTreeView.Name = "_mTaskTreeView";
-            this._mTaskTreeView.Size = new System.Drawing.Size(270, 568);
+            this._mTaskTreeView.Size = new System.Drawing.Size(270, 566);
             this._mTaskTreeView.TabIndex = 0;
             this._mTaskTreeView.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this._mTaskTreeView_AfterSelect);
             // 

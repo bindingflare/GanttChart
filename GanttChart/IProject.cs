@@ -50,6 +50,11 @@ namespace Edcore.GanttChart
         public TimeSpan End { get; internal set; }
 
         /// <summary>
+        /// Get the actual end time of this Task relative to the project start
+        /// </summary>
+        public TimeSpan ActualEnd { get; internal set; }
+
+        /// <summary>
         /// Get the duration of this Task in days
         /// </summary>
         public TimeSpan Duration { get; internal set; }
@@ -274,6 +279,16 @@ namespace Edcore.GanttChart
         /// <param name="task"></param>
         /// <param name="duration">Number of timescale units between ProjectManager.Start</param>
         void SetDuration(T task, TimeSpan duration);
+        /// <summary>
+        /// Set actual end of the specified task.
+        /// </summary>
+        /// <param name="name">Name of custom field</param>
+        void SetActualEnd(T task, TimeSpan delay);
+        /// <summary>
+        /// Set the delay in time since end of the specified task.
+        /// </summary>
+        /// <param name="name">Name of custom field</param>
+        void SetDelay(T task, TimeSpan delay);
         /// <summary>
         /// Add a custom field.
         /// </summary>

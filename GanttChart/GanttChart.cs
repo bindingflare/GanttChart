@@ -1253,7 +1253,7 @@ namespace Edcore.GanttChart
                     RectangleF taskRect;
 
                     // Compute task rectangle
-                    taskRect = new RectangleF(GetSpan(task.Start), yCoord, GetSpan(task.Duration), this.BarHeight);
+                    taskRect = new RectangleF(GetSpan(task.Start), yCoord, GetSpan(task.Duration + task.Delay), this.BarHeight);
                     _mChartTaskRects.Add(task, taskRect); // also add groups and split tasks (not just task parts)
 
                     if (!m_Project.IsSplit(task))
@@ -1276,8 +1276,8 @@ namespace Edcore.GanttChart
                     }
                     float xCoord = GetSpan(task.End);
 
-                    // Compute Delay Rectangles
-                    if (task.Delay.Ticks != 0)
+                    // Compute Delay Rectangles (Hatched)
+                    if (task.ActualEnd != task.End)
                     {
                         float span = GetSpan(task.Delay);
 
@@ -1507,6 +1507,11 @@ namespace Edcore.GanttChart
             {
                 // Get the taskrect
                 var taskRect = _mChartTaskRects[task];
+                var delayRect = RectangleF.Empty;
+                if(_mChartDelayRects.ContainsKey(task))
+                {
+                    delayRect = _mChartDelayRects[task];
+                }
 
                 // Only begin drawing when the taskrect is to the left of the clipRect's right edge
                 if (taskRect.Left <= viewRect.Right)
@@ -1525,16 +1530,8 @@ namespace Edcore.GanttChart
                         }
                         else
                         {
-                            __DrawRegularTaskAndGroup(graphics, e, task, taskRect);
+                            __DrawRegularTaskAndGroup(graphics, e, task, taskRect, delayRect);
                         }
-                    }
-
-                    // Draw delay
-                    if (_mChartDelayRects.ContainsKey(task))
-                    {
-                        var delayrect = _mChartDelayRects[task];
-                        graphics.FillRectangle(Brushes.PaleVioletRed, delayrect);
-                        graphics.DrawRectangle(e.Format.Border, delayrect);
                     }
 
                     // Write completion % text
@@ -1647,12 +1644,33 @@ namespace Edcore.GanttChart
             }
         }
 
-        private void __DrawRegularTaskAndGroup(Graphics graphics, TaskPaintEventArgs e, Task task, RectangleF taskRect)
+        private void __DrawRegularTaskAndGroup(Graphics graphics, TaskPaintEventArgs e, Task task, RectangleF taskRect, RectangleF delayRect)
         {
             var fill = taskRect;
+            var delayFill = delayRect;
             fill.Width = (int)(fill.Width * task.Complete);
+            
+            // Calculated delayed complete rect
+            if(fill.Right > delayFill.Left)
+            {
+                delayFill.Width = fill.Right - delayFill.Left;
+            }
+            else
+            {
+                delayFill = Rectangle.Empty;
+            }
+            
             graphics.FillRectangle(e.Format.BackFill, taskRect);
+
+            // Draw delay
+            if (_mChartDelayRects.ContainsKey(task))
+            {
+                HatchBrush myHatchBrush = new HatchBrush(HatchStyle.ForwardDiagonal, Color.PaleVioletRed, Color.Transparent);
+                graphics.FillRectangle(myHatchBrush, delayRect);
+            }
+
             graphics.FillRectangle(e.Format.ForeFill, fill);
+            graphics.FillRectangle(Brushes.PaleVioletRed, delayFill);
             graphics.DrawRectangle(e.Format.Border, taskRect);
 
             // check if this is a parent task / group task, then draw the bracket
@@ -1692,6 +1710,14 @@ namespace Edcore.GanttChart
             // Draw Part Rectangles
             var taskRects = parts.Select(x => x.Value).ToArray();
             graphics.FillRectangles(e.Format.BackFill, taskRects);
+
+            // Draw delay
+            if (_mChartDelayRects.ContainsKey(task))
+            {
+                var delayrect = _mChartDelayRects[task];
+                HatchBrush myHatchBrush = new HatchBrush(HatchStyle.ForwardDiagonal, Color.PaleVioletRed, Color.Transparent);
+                graphics.FillRectangle(myHatchBrush, delayrect);
+            }
 
             // Draw % complete indicators
             graphics.FillRectangles(e.Format.ForeFill, parts.Select(x => new RectangleF(x.Value.X, x.Value.Y, x.Value.Width * x.Key.Complete, x.Value.Height)).ToArray());

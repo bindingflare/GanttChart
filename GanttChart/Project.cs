@@ -1319,9 +1319,16 @@ namespace Edcore.GanttChart
             return true;
         }
 
-        private void SetDelay(T task, TimeSpan data)
+        public void SetActualEnd(T task, TimeSpan actualEnd)
         {
-            task.Delay = data;
+            task.ActualEnd = actualEnd;
+        }
+
+        public void SetDelay(T task, TimeSpan delay)
+        {
+            // Set actual end
+            task.ActualEnd = task.End + delay;
+            task.Delay = delay;
         }
 
         public int GetFieldIndex(string name) // warning: for fields with duplicate names, can cause unwanted behavior
@@ -1370,7 +1377,7 @@ namespace Edcore.GanttChart
                     if (value < TimeSpan.Zero) value = TimeSpan.Zero;
                     if (this.DirectPrecedentsOf(task).Any())
                     {
-                        var max_end = this.DirectPrecedentsOf(task).Max(x => x.End);
+                        var max_end = this.DirectPrecedentsOf(task).Max(x => x.ActualEnd);
                         if (value <= max_end) value = max_end; // + One;
                     }
 
@@ -1383,6 +1390,7 @@ namespace Edcore.GanttChart
 
                     // affect self
                     task.End = task.Start + task.Duration;
+                    task.ActualEnd = task.End + task.Delay;
 
                     // calculate dependants
                     _RecalculateDependantsOf(task);
@@ -1464,6 +1472,7 @@ namespace Edcore.GanttChart
                     // assign end value
                     task.End = value;
                     task.Duration = task.End - task.Start;
+                    task.ActualEnd = task.End + task.Delay;
 
                     _RecalculateDependantsOf(task);
 
@@ -1471,6 +1480,7 @@ namespace Edcore.GanttChart
                     {
                         last_part.End = value;
                         last_part.Duration = last_part.End - last_part.Start;
+                        last_part.ActualEnd = last_part.End + last_part.Delay;
                     }
                 }
             }
@@ -1484,7 +1494,7 @@ namespace Edcore.GanttChart
             // check bounds
             if (this.DirectPrecedentsOf(split).Any())
             {
-                var max_end = this.DirectPrecedentsOf(split).Max(x => x.End);
+                var max_end = this.DirectPrecedentsOf(split).Max(x => x.ActualEnd);
                 if (value < max_end) value = max_end;
             }
             if (value < TimeSpan.Zero) value = TimeSpan.Zero;
@@ -1496,6 +1506,7 @@ namespace Edcore.GanttChart
             var duration = part.End - part.Start;
             part.Start = value;
             part.End = value + duration;
+            part.ActualEnd = part.End + part.Delay;
 
             // pack packs
             if (backwards) _PackPartsBackwards(parts);
@@ -1505,6 +1516,7 @@ namespace Edcore.GanttChart
             split.Start = parts.First().Start; // recalculate the split task
             split.End = parts.Last().End;
             split.Duration = split.End - split.Start;
+            split.ActualEnd = split.End + split.Delay;
 
             _RecalculateDependantsOf(split);
         }
@@ -1523,6 +1535,7 @@ namespace Edcore.GanttChart
             // set end value and duration
             part.End = value;
             part.Duration = part.End - part.Start;
+            part.ActualEnd = part.End + part.Delay;
 
             // pack parts
             if (increased) _PackPartsForward(parts);
@@ -1531,6 +1544,7 @@ namespace Edcore.GanttChart
             split.Start = parts.First().Start; // recalculate the split task
             split.End = parts.Last().End;
             split.Duration = split.End - split.Start;
+            split.ActualEnd = split.End + split.Delay;
 
             _RecalculateDependantsOf(split);
         }
@@ -1633,8 +1647,8 @@ namespace Edcore.GanttChart
             // affect decendants
             foreach (var dependant in this.DirectDependantsOf(precedent))
             {
-                if (dependant.Start < precedent.End)
-                    this._SetStartHelper(dependant, precedent.End);
+                if (dependant.Start < precedent.ActualEnd)
+                    this._SetStartHelper(dependant, precedent.ActualEnd);
             }
         }
 

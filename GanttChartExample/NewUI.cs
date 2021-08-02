@@ -18,13 +18,13 @@ namespace Edcore.GanttChart
     /// </summary>
     public partial class NewUI : Form
     {
-        OverlayPainter _mOverlay = new OverlayPainter();
+        OverlayPainter m_Overlay = new OverlayPainter();
         ProjectManager m_Manager = null;
         Form taskForm = null;
 
-        private int _SplitterX;
+        private int _splitterX;
         private int _scrollFix = 0;
-        private bool isPanning = false;
+        private bool _isPanning = false;
         private bool _searchMode = false;
         private Task m_SelectedTask;
         private OLVColumn m_SelectedTaskColumn;
@@ -115,9 +115,9 @@ namespace Edcore.GanttChart
             //m_Manager.SetField(work, "Important", "Yes");
 
             // Test delay
-            m_Manager.SetField(job2, 6, new TimeSpan(3, 0, 0, 0));
-            m_Manager.SetField(job3, 6, new TimeSpan(1, 0, 0, 0));
-            m_Manager.SetField(job4, 6, new TimeSpan(7, 0, 0, 0));
+            m_Manager.SetDelay(job2, new TimeSpan(3, 0, 0, 0));
+            m_Manager.SetDelay(job3, new TimeSpan(1, 0, 0, 0));
+            m_Manager.SetDelay(job4, new TimeSpan(7, 0, 0, 0));
 
             // Create another 1000 tasks for stress testing
             Random rand = new Random();
@@ -224,8 +224,8 @@ namespace Edcore.GanttChart
             m_Chart.TaskSelected += new EventHandler<TaskMouseEventArgs>(m_Chart_TaskSelected);
             m_Chart.TaskDeselecting += new EventHandler<TaskMouseEventArgs>(m_Chart_TaskDeselecting);
             m_Chart.TaskMouseDoubleClick += new EventHandler<TaskMouseEventArgs>(m_Chart_TaskMouseDoubleClick);
-            _mOverlay.PrintMode = true;
-            m_Chart.PaintOverlay += _mOverlay.ChartOverlayPainter;
+            m_Overlay.PrintMode = true;
+            m_Chart.PaintOverlay += m_Overlay.ChartOverlayPainter;
             m_Chart.AllowTaskDragDrop = true;
             //m_Chart.Scroll += new ScrollEventHandler(m_Chart_Scroll);
             m_Chart.MouseWheel += new MouseEventHandler(m_Chart_MouseWheel);
@@ -291,9 +291,9 @@ namespace Edcore.GanttChart
         private void m_Chart_MousePan(object sender, MousePanEventArgs e)
         {
             // Prevent tasklist's Scroll event from mixing with panning functionality
-            isPanning = true;
+            _isPanning = true;
             m_TaskList.LowLevelScroll(0, e.StartLocation.Y - e.PreviousLocation.Y);
-            isPanning = false;
+            _isPanning = false;
         }
 
         private void m_Tasklist_ColumnRightClick(object sender, ColumnClickEventArgs e)
@@ -408,7 +408,6 @@ namespace Edcore.GanttChart
 
         private void m_SplitContainer_MouseDown(object sender, MouseEventArgs e)
         {
-            // This disables the normal move behavior
             ((SplitContainer)sender).IsSplitterFixed = true;
 
             // Calculate max size
@@ -421,13 +420,11 @@ namespace Edcore.GanttChart
                 }
             }
 
-            _SplitterX = (int) maxSize + 24;
+            _splitterX = (int) maxSize + 24;
         }
-
-        //assign this to the SplitContainer's MouseUp event
+        
         private void m_SplitContainer_MouseUp(object sender, MouseEventArgs e)
         {
-            // This allows the splitter to be moved normally again
             ((SplitContainer)sender).IsSplitterFixed = false;
         }
         
@@ -437,24 +434,20 @@ namespace Edcore.GanttChart
             // normal move behavior also
             if (((SplitContainer)sender).IsSplitterFixed)
             {
-                // Make sure that the button used to move the splitter
-                // is the left mouse button
                 if (e.Button.Equals(MouseButtons.Left))
                 {
                     if (((SplitContainer)sender).Orientation.Equals(Orientation.Vertical))
                     {
-                        // Only move the splitter if the mouse is within
-                        // the appropriate bounds
+                        // Update splitter distance and refresh
                         int newSize = e.X;
 
                         if (newSize > 0)
                         {
-                            if(newSize > _SplitterX)
+                            if(newSize > _splitterX)
                             {
-                                newSize = _SplitterX;
+                                newSize = _splitterX;
                             }
-
-                            // Move the splitter & force a visual refresh
+                            
                             ((SplitContainer)sender).SplitterDistance = newSize;
                             ((SplitContainer)sender).Refresh();
                         }
@@ -462,7 +455,6 @@ namespace Edcore.GanttChart
                 }
                 else
                 {
-                    // This allows the splitter to be moved normally again
                     ((SplitContainer)sender).IsSplitterFixed = false;
                 }
             }
@@ -539,7 +531,7 @@ namespace Edcore.GanttChart
 
         private void m_TaskList_Scroll(object sender, ScrollEventArgs e)
         {
-            if (e.ScrollOrientation == ScrollOrientation.VerticalScroll && !isPanning)
+            if (e.ScrollOrientation == ScrollOrientation.VerticalScroll && !_isPanning)
             {
                 m_Chart.Viewport.Y = (e.NewValue + _scrollFix) * m_Chart.BarSpacing;
             }
@@ -756,7 +748,7 @@ namespace Edcore.GanttChart
 
         private void mnuViewIntructions_Click(object sender, EventArgs e)
         {
-            _mOverlay.PrintMode = !(mnuViewIntructions.Checked = !mnuViewIntructions.Checked);
+            m_Overlay.PrintMode = !(mnuViewIntructions.Checked = !mnuViewIntructions.Checked);
             m_Chart.Invalidate();
             //m_Tasklist.Invalidate();
         }
