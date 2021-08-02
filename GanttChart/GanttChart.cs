@@ -817,8 +817,18 @@ namespace Edcore.GanttChart
             // Default drag behaviors **********************************
             if (e.Button == System.Windows.Forms.MouseButtons.Middle)
             {
-                var complete = e.Source.Complete + (float)(e.X - e.PreviousLocation.X) / GetSpan(e.Source.Duration + e.Source.Delay);
-                m_Project.SetComplete(e.Source, complete);
+                if(m_Project.IsPart(e.Source))
+                {
+                    // Use delay of split task
+                    var complete = e.Source.Complete + (float)(e.X - e.PreviousLocation.X) / GetSpan(e.Source.Duration + m_Project.SplitTaskOf(e.Source).Delay);
+                    m_Project.SetComplete(e.Source, complete);
+
+                }
+                else
+                {
+                    var complete = e.Source.Complete + (float)(e.X - e.PreviousLocation.X) / GetSpan(e.Source.Duration + e.Source.Delay);
+                    m_Project.SetComplete(e.Source, complete);
+                }
             }
             else if (e.Button == System.Windows.Forms.MouseButtons.Right || e.Button == MouseButtons.Left && isNearEdge)
             {
@@ -1722,17 +1732,31 @@ namespace Edcore.GanttChart
             var taskRects = parts.Select(x => x.Value).ToArray();
             graphics.FillRectangles(e.Format.BackFill, taskRects);
 
-            // Draw delay
-            if (_mChartDelayRects.ContainsKey(task))
-            {
-                var delayrect = _mChartDelayRects[task];
-                HatchBrush myHatchBrush = new HatchBrush(HatchStyle.ForwardDiagonal, Color.PaleVioletRed, Color.Transparent);
-                graphics.FillRectangle(myHatchBrush, delayrect);
-            }
-
             // Draw % complete indicators
             graphics.FillRectangles(e.Format.ForeFill, parts.Select(x => new RectangleF(x.Value.X, x.Value.Y, x.Value.Width * x.Key.Complete, x.Value.Height)).ToArray());
 
+            // Draw delay
+            if (_mChartDelayRects.ContainsKey(task))
+            {
+                var delayRect = _mChartDelayRects[task];
+                HatchBrush myHatchBrush = new HatchBrush(HatchStyle.ForwardDiagonal, Color.PaleVioletRed, Color.Transparent);
+                graphics.FillRectangle(myHatchBrush, delayRect);
+
+                // Calculated delayed complete rect
+                var delayFill = _mChartDelayRects[task];
+                var lastPart = parts.Last();
+                var completionX = lastPart.Value.X + lastPart.Value.Width * lastPart.Key.Complete;
+                if (completionX > delayFill.Left)
+                {
+                    delayFill.Width = completionX - delayFill.Left;
+                }
+                else
+                {
+                    delayFill = Rectangle.Empty;
+                }
+                graphics.FillRectangle(Brushes.PaleVioletRed, delayFill);
+            }
+            
             // Draw border
             graphics.DrawRectangles(e.Format.Border, taskRects);
         }

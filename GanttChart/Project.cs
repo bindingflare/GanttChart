@@ -1706,6 +1706,7 @@ namespace Edcore.GanttChart
             var start = TimeSpan.MaxValue;
             var end = TimeSpan.MinValue;
             var delay = TimeSpan.Zero;
+
             foreach (var member in DirectMembersOf(group))
             {
                 if (IsGroup(member))
@@ -1723,15 +1724,6 @@ namespace Edcore.GanttChart
             _SetStartHelper(group, start);
             _SetEndHelper(group, end);
             _SetCompleteHelper(group, t_complete / t_duration.Ticks);
-
-            if (group == Tasks.ElementAt(7))
-            {
-                int hi = 1;
-                if(group.Duration.Days == 32)
-                {
-                    int yes = 0;
-                }
-            }
 
             // Calculations on delay
             TimeSpan proportionalDelay = TimeSpan.FromTicks(Convert.ToInt64(((float) delay.Ticks / t_duration.Ticks) * group.Duration.Ticks));
