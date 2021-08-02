@@ -100,7 +100,7 @@ namespace Edcore.GanttChart
         /// <returns></returns>
         public override string ToString()
         {
-            string str = string.Format("[Name: {0}, Start: {1}, End: {2}, Duration: {3}, Complete: {4}, CanExpand: {5}, IsCollapsed: {6}, IsFiltered: {7}, UserFields: ", Name, Start, End, Duration, Complete);
+            string str = string.Format("[Name: {0}, Start: {1}, End: {2}, Actual End: {3}, Delay: {4}, Duration: {5}, Complete: {6}, CanExpand: {7}, IsCollapsed: {8}, IsFiltered: {9}, UserFields: ", Name, Start, End, ActualEnd, Delay, Duration, Complete, CanExpand, IsCollapsed, IsFiltered);
 
             for (int i = 0; i < CustomFieldsData.Length - 1; i++)
             {

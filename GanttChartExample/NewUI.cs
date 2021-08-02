@@ -118,6 +118,7 @@ namespace Edcore.GanttChart
             m_Manager.SetDelay(job2, new TimeSpan(3, 0, 0, 0));
             m_Manager.SetDelay(job3, new TimeSpan(1, 0, 0, 0));
             m_Manager.SetDelay(job4, new TimeSpan(7, 0, 0, 0));
+            m_Manager.SetDelay(job7, new TimeSpan(3, 0, 0, 0));
 
             // Create another 1000 tasks for stress testing
             Random rand = new Random();
@@ -174,13 +175,13 @@ namespace Edcore.GanttChart
             m_Manager.Group(job1, job3);
             m_Manager.Group(job1, job4);
             m_Manager.Group(job1, job5);
-            m_Manager.Group(job1, job6);
+            //m_Manager.Group(job1, job6);
             m_Manager.Group(job1, job7);
             m_Manager.Relate(job2, job3);
             m_Manager.Relate(job2, job4);
             m_Manager.Relate(job4, job5);
-            m_Manager.Relate(job4, job6);
-            m_Manager.Relate(job6, job7);
+            //m_Manager.Relate(job4, job6);
+            //m_Manager.Relate(job6, job7);
             m_Manager.Relate(job5, job7);
 
             // Create and assign Resources.
@@ -1500,6 +1501,17 @@ namespace Edcore.GanttChart
                 }
             }
         }
+
+        private void setDelayToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string input;
+            if (_promptString("Enter new delay", "Set delay", m_SelectedTask.Delay.ToString("g"), "Wrong input", out input))
+            {
+                m_Manager.SetDelay(m_SelectedTask, TimeSpan.Parse(input));
+                m_TaskList.Invalidate();
+                m_Chart.Invalidate();
+            }
+        }
     }
 
     #region overlay painter
@@ -1596,7 +1608,7 @@ namespace Edcore.GanttChart
         /// <returns></returns>
         public override string ToString()
         {
-            string str = string.Format("[Name: {0}, Start: {1}, End: {2}, Duration: {3}, Complete: {4}, CanExpand: {5}, IsCollapsed: {6}, IsFiltered: {7}, UserFields: ", Name, Start, End, Duration, Complete, CanExpand, IsCollapsed, IsFiltered);
+            string str = string.Format("[Name: {0}, Start: {1}, End: {2}, Actual End: {3}, Delay: {4}, Duration: {5}, Complete: {6}, CanExpand: {7}, IsCollapsed: {8}, IsFiltered: {9}, UserFields: ", Name, Start, End, ActualEnd, Delay, Duration, Complete, CanExpand, IsCollapsed, IsFiltered);
 
             for (int i = 0; i < CustomFieldsData.Length - 1; i++)
             {

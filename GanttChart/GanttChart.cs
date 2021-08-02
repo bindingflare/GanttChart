@@ -817,7 +817,7 @@ namespace Edcore.GanttChart
             // Default drag behaviors **********************************
             if (e.Button == System.Windows.Forms.MouseButtons.Middle)
             {
-                var complete = e.Source.Complete + (float)(e.X - e.PreviousLocation.X) / GetSpan(e.Source.Duration);
+                var complete = e.Source.Complete + (float)(e.X - e.PreviousLocation.X) / GetSpan(e.Source.Duration + e.Source.Delay);
                 m_Project.SetComplete(e.Source, complete);
             }
             else if (e.Button == System.Windows.Forms.MouseButtons.Right || e.Button == MouseButtons.Left && isNearEdge)
@@ -1265,24 +1265,35 @@ namespace Edcore.GanttChart
                     {
                         var parts = new List<KeyValuePair<Task, RectangleF>>();
                         _mChartTaskPartRects.Add(task, parts);
-                        foreach (var part in m_Project.PartsOf(task))
+
+                        var taskParts = m_Project.PartsOf(task);
+                        for(int i = 0; i < taskParts.Count() - 1; i++)
                         {
-                            taskRect = new RectangleF(GetSpan(part.Start), yCoord, GetSpan(part.Duration), this.BarHeight);
+                            var part = taskParts.ElementAt(i);
+
+                            taskRect = new RectangleF(GetSpan(part.Start), yCoord, GetSpan(part.Duration), this.BarHeight); // parts do not implement delay
                             parts.Add(new KeyValuePair<Task, RectangleF>(part, taskRect));
 
                             // Parts are mouse enabled, add to hitRect collection
                             _mChartTaskHitRects.Add(part, taskRect);
                         }
+
+                        // add delay as part of split task
+                        var lastPart = taskParts.Last();
+
+                        var delayRect = new RectangleF(GetSpan(lastPart.Start), yCoord, GetSpan(lastPart.Duration + task.Delay), this.BarHeight);
+                        parts.Add(new KeyValuePair<Task, RectangleF>(lastPart, delayRect));
+                        _mChartTaskHitRects.Add(lastPart, delayRect);
                     }
                     float xCoord = GetSpan(task.End);
 
-                    // Compute Delay Rectangles (Hatched)
+                    // Compute Delay Rectangles
                     if (task.ActualEnd != task.End)
                     {
                         float span = GetSpan(task.Delay);
 
-                        var slackRect = new RectangleF(xCoord, yCoord, span, this.BarHeight);
-                        _mChartDelayRects.Add(task, slackRect);
+                        var delayRect = new RectangleF(xCoord, yCoord, span, this.BarHeight);
+                        _mChartDelayRects.Add(task, delayRect);
 
                         xCoord += span;
                     }

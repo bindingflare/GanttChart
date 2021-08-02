@@ -116,6 +116,8 @@ namespace Edcore.GanttChart
             this.m_TaskList = new BrightIdeasSoftware.TreeListView();
             this.projectTitleLabel = new System.Windows.Forms.Label();
             this.m_Chart = new Edcore.GanttChart.GanttChart();
+            this.setDelayToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.taskMenuStrip.SuspendLayout();
@@ -491,51 +493,53 @@ namespace Edcore.GanttChart
             this.taskMenuStrip.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.taskMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.editNameToolStripMenuItem,
+            this.setDelayToolStripMenuItem,
             this.toolStripSeparator2,
             this.addChildToolStripMenuItem,
             this.deleteToolStripMenuItem,
+            this.toolStripSeparator3,
             this.mergeToolStripMenuItem,
             this.splitToolStripMenuItem});
             this.taskMenuStrip.Name = "contextMenuStrip1";
-            this.taskMenuStrip.Size = new System.Drawing.Size(130, 120);
+            this.taskMenuStrip.Size = new System.Drawing.Size(153, 170);
             // 
             // editNameToolStripMenuItem
             // 
             this.editNameToolStripMenuItem.Name = "editNameToolStripMenuItem";
-            this.editNameToolStripMenuItem.Size = new System.Drawing.Size(129, 22);
+            this.editNameToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.editNameToolStripMenuItem.Text = "Edit field...";
             this.editNameToolStripMenuItem.Click += new System.EventHandler(this.editFieldToolStripMenuItem_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(126, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(149, 6);
             // 
             // addChildToolStripMenuItem
             // 
             this.addChildToolStripMenuItem.Name = "addChildToolStripMenuItem";
-            this.addChildToolStripMenuItem.Size = new System.Drawing.Size(129, 22);
+            this.addChildToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.addChildToolStripMenuItem.Text = "Add child";
             this.addChildToolStripMenuItem.Click += new System.EventHandler(this.addChildToolStripMenuItem_Click);
             // 
             // deleteToolStripMenuItem
             // 
             this.deleteToolStripMenuItem.Name = "deleteToolStripMenuItem";
-            this.deleteToolStripMenuItem.Size = new System.Drawing.Size(129, 22);
+            this.deleteToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.deleteToolStripMenuItem.Text = "Delete";
             this.deleteToolStripMenuItem.Click += new System.EventHandler(this.deleteToolStripMenuItem_Click);
             // 
             // mergeToolStripMenuItem
             // 
             this.mergeToolStripMenuItem.Name = "mergeToolStripMenuItem";
-            this.mergeToolStripMenuItem.Size = new System.Drawing.Size(129, 22);
-            this.mergeToolStripMenuItem.Text = "Merge";
+            this.mergeToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.mergeToolStripMenuItem.Text = "Merge all";
             this.mergeToolStripMenuItem.Click += new System.EventHandler(this.mergeToolStripMenuItem_Click);
             // 
             // splitToolStripMenuItem
             // 
             this.splitToolStripMenuItem.Name = "splitToolStripMenuItem";
-            this.splitToolStripMenuItem.Size = new System.Drawing.Size(129, 22);
+            this.splitToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.splitToolStripMenuItem.Text = "Split";
             this.splitToolStripMenuItem.Click += new System.EventHandler(this.splitToolStripMenuItem_Click);
             // 
@@ -618,7 +622,7 @@ namespace Edcore.GanttChart
             this._mTaskTreeView.Dock = System.Windows.Forms.DockStyle.Fill;
             this._mTaskTreeView.Location = new System.Drawing.Point(3, 3);
             this._mTaskTreeView.Name = "_mTaskTreeView";
-            this._mTaskTreeView.Size = new System.Drawing.Size(270, 566);
+            this._mTaskTreeView.Size = new System.Drawing.Size(270, 568);
             this._mTaskTreeView.TabIndex = 0;
             this._mTaskTreeView.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this._mTaskTreeView_AfterSelect);
             // 
@@ -700,7 +704,7 @@ namespace Edcore.GanttChart
             this._mResourceGrid.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this._mResourceGrid.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.colName});
-            this._mResourceGrid.Location = new System.Drawing.Point(3, 191);
+            this._mResourceGrid.Location = new System.Drawing.Point(3, 155);
             this._mResourceGrid.Name = "_mResourceGrid";
             this._mResourceGrid.Size = new System.Drawing.Size(226, 164);
             this._mResourceGrid.TabIndex = 4;
@@ -750,7 +754,7 @@ namespace Edcore.GanttChart
             // 
             this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(3, 176);
+            this.label2.Location = new System.Drawing.Point(3, 140);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(76, 15);
             this.label2.TabIndex = 1;
@@ -763,7 +767,7 @@ namespace Edcore.GanttChart
             this._mTaskGrid.LineColor = System.Drawing.SystemColors.ControlDark;
             this._mTaskGrid.Location = new System.Drawing.Point(3, 3);
             this._mTaskGrid.Name = "_mTaskGrid";
-            this._mTaskGrid.Size = new System.Drawing.Size(226, 172);
+            this._mTaskGrid.Size = new System.Drawing.Size(226, 136);
             this._mTaskGrid.TabIndex = 3;
             // 
             // quickButtonPanel
@@ -913,6 +917,18 @@ namespace Edcore.GanttChart
             this.m_Chart.Size = new System.Drawing.Size(852, 680);
             this.m_Chart.TabIndex = 2;
             // 
+            // setDelayToolStripMenuItem
+            // 
+            this.setDelayToolStripMenuItem.Name = "setDelayToolStripMenuItem";
+            this.setDelayToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.setDelayToolStripMenuItem.Text = "Set delay...";
+            this.setDelayToolStripMenuItem.Click += new System.EventHandler(this.setDelayToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(149, 6);
+            // 
             // NewUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -1049,6 +1065,8 @@ namespace Edcore.GanttChart
         private BrightIdeasSoftware.TreeListView m_TaskList;
         private System.Windows.Forms.TextBox m_SearchTextBox;
         private System.Windows.Forms.ToolStripMenuItem editFieldToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem setDelayToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
     }
 }
 

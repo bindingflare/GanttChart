@@ -1321,14 +1321,49 @@ namespace Edcore.GanttChart
 
         public void SetActualEnd(T task, TimeSpan actualEnd)
         {
-            task.ActualEnd = actualEnd;
+            if(task.End < task.ActualEnd)
+            {
+                task.ActualEnd = actualEnd;
+                task.Delay = task.ActualEnd - task.End;
+            }
         }
 
         public void SetDelay(T task, TimeSpan delay)
         {
-            // Set actual end
-            task.ActualEnd = task.End + delay;
-            task.Delay = delay;
+            if (m_splitTaskOfPartMap.ContainsKey(task))
+            {
+                // task part belonging to a split task needs special treatment
+                var split = m_splitTaskOfPartMap[task];
+                var parts = m_partsOfSplitTaskMap[split];
+                
+                split.ActualEnd = task.End + delay;
+                split.Delay = delay;
+                var last = parts.Last();
+                last.ActualEnd = split.ActualEnd;
+                last.Delay = split.Delay;
+            }
+            else // regular task or a split task, which we will treat normally
+            {
+                // Set actual end
+                task.ActualEnd = task.End + delay;
+                task.Delay = delay;
+            }
+
+            // If member, check if delay affects group
+            if(IsMember(task))
+            {
+                var group = DirectGroupOf(task);
+
+                // Check if delay proceeds up the grouping chain
+                if(group.ActualEnd < task.ActualEnd)
+                {
+                    SetDelay(group, task.ActualEnd - group.ActualEnd);
+                }
+                else
+                {
+                    SetDelay(group, TimeSpan.Zero);
+                }
+            }   
         }
 
         public int GetFieldIndex(string name) // warning: for fields with duplicate names, can cause unwanted behavior
@@ -1663,24 +1698,48 @@ namespace Edcore.GanttChart
 
         private void _RecalculateAncestorsScheduleHelper(T group)
         {
+            // Reset delay
+            group.Delay = TimeSpan.Zero;
+
             float t_complete = 0;
             TimeSpan t_duration = TimeSpan.Zero;
             var start = TimeSpan.MaxValue;
             var end = TimeSpan.MinValue;
-            foreach (var member in this.DirectMembersOf(group))
+            var delay = TimeSpan.Zero;
+            foreach (var member in DirectMembersOf(group))
             {
-                if (this.IsGroup(member))
+                if (IsGroup(member))
                     _RecalculateAncestorsScheduleHelper(member);
 
-                t_duration += member.Duration;
-                t_complete += member.Complete * member.Duration.Ticks;
-                if (member.Start < start) start = member.Start;
-                if (member.End > end) end = member.End;
+                delay += member.Delay;
+                t_duration += member.Duration + member.Delay;
+                t_complete += member.Complete * (member.Duration + member.Delay).Ticks;
+                if (member.Start < start)
+                    start = member.Start;
+                if (member.ActualEnd > end)
+                    end = member.ActualEnd;
             }
 
-            this._SetStartHelper(group, start);
-            this._SetEndHelper(group, end);
-            this._SetCompleteHelper(group, t_complete / t_duration.Ticks);
+            _SetStartHelper(group, start);
+            _SetEndHelper(group, end);
+            _SetCompleteHelper(group, t_complete / t_duration.Ticks);
+
+            if (group == Tasks.ElementAt(7))
+            {
+                int hi = 1;
+                if(group.Duration.Days == 32)
+                {
+                    int yes = 0;
+                }
+            }
+
+            // Calculations on delay
+            TimeSpan proportionalDelay = TimeSpan.FromTicks(Convert.ToInt64(((float) delay.Ticks / t_duration.Ticks) * group.Duration.Ticks));
+
+            group.ActualEnd = group.End;
+            group.Duration -= proportionalDelay;
+            group.End -= proportionalDelay;
+            group.Delay = proportionalDelay;
         }
 
         private void _RecalculateSlack()
