@@ -1660,14 +1660,21 @@ namespace Edcore.GanttChart
                     t_complete += part.Complete * part.Duration.Ticks;
                     t_duration += part.Duration;
                 }
+
+                // Add delay from complete of last part
+                var lastPart = m_partsOfSplitTaskMap[groupOrSplit].Last();
+                t_complete += lastPart.Complete * groupOrSplit.Delay.Ticks;
+                t_duration += lastPart.Delay;
             }
             else
             {
                 foreach (var member in this.DirectMembersOf(groupOrSplit))
                 {
-                    t_duration += member.Duration;
-                    if (this.IsGroup(member)) t_complete += _RecalculateCompletedHelper(member) * member.Duration.Ticks;
-                    else t_complete += member.Complete * member.Duration.Ticks;
+                    var memberDuration = member.Duration + member.Delay;
+
+                    t_duration += memberDuration;
+                    if (this.IsGroup(member)) t_complete += _RecalculateCompletedHelper(member) * memberDuration.Ticks;
+                    else t_complete += member.Complete * memberDuration.Ticks;
                 }
             }
 
