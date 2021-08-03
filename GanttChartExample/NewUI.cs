@@ -1512,6 +1512,12 @@ namespace Edcore.GanttChart
                 m_Chart.Invalidate();
             }
         }
+
+        private void toggleSmartViewToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            m_Chart.smartView = !m_Chart.smartView;
+            m_Chart.Invalidate();
+        }
     }
 
     #region overlay painter
