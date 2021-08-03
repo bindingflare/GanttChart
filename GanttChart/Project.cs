@@ -1352,17 +1352,7 @@ namespace Edcore.GanttChart
             // If member, check if delay affects group
             if(IsMember(task))
             {
-                var group = DirectGroupOf(task);
-
-                // Check if delay proceeds up the grouping chain
-                if(group.ActualEnd < task.ActualEnd)
-                {
-                    SetDelay(group, task.ActualEnd - group.ActualEnd);
-                }
-                else
-                {
-                    SetDelay(group, TimeSpan.Zero);
-                }
+                _RecalculateAncestorsScheduleHelper(DirectGroupOf(task));
             }   
         }
 

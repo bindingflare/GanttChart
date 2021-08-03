@@ -597,6 +597,7 @@ namespace Edcore.GanttChart
             columnsList[2].AspectPutter = delegate (object x, object value) { m_Manager.SetStart((Task)x, (DateTime)value - m_Manager.Start); };
             columnsList[3].AspectPutter = delegate (object x, object value) { m_Manager.SetEnd((Task)x, (DateTime)value - m_Manager.Start); };
             columnsList[4].AspectPutter = delegate (object x, object value) { m_Manager.SetDuration((Task)x, TimeSpan.Parse((string)value)); };
+            columnsList[6].AspectPutter = delegate (object x, object value) { m_Manager.SetDelay((Task)x, TimeSpan.Parse((string)value)); };
 
             objectListView.Columns.AddRange(columnsList.Cast<ColumnHeader>().ToArray());
             objectListView.RebuildColumns();
