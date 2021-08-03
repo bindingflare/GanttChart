@@ -58,9 +58,10 @@ namespace Edcore.GanttChart
             HeaderList.Add(new Header("End", "date", 3, 125f));
             HeaderList.Add(new Header("Duration", "time", 4, 80f));
             HeaderList.Add(new Header("Complete", "string", 5, 60f, true, true));
+            HeaderList.Add(new Header("Delay", "string", 6, 80f));
 
-            FieldCount = 6;
-            MainFieldCount = 6;
+            FieldCount = 7;
+            MainFieldCount = 7;
         }
 
         /// <summary>
@@ -1177,6 +1178,8 @@ namespace Edcore.GanttChart
                     return task.Duration;
                 case 5:
                     return task.Complete;
+                case 6:
+                    return task.Delay;
                 default:
                     return task.CustomFieldsData[index - MainFieldCount];
             }
@@ -1247,6 +1250,18 @@ namespace Edcore.GanttChart
         }
 
         /// <summary>
+        /// Set a field's data using field header
+        /// </summary>
+        /// <param name="task"></param>
+        /// <param name="index">Field index</param>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public bool SetField(T task, Header header, string data)
+        {
+            return SetField(task, header.Index, data);
+        }
+
+        /// <summary>
         /// Set a field's data using field index
         /// </summary>
         /// <param name="task"></param>
@@ -1292,6 +1307,9 @@ namespace Edcore.GanttChart
                 case 4:
                     SetDuration(task, data);
                     break;
+                case 6:
+                    SetDelay(task, data);
+                    break;
                 default:
                     // Custom field
                     return false; // TODO: Allow more forms of cu
@@ -1299,6 +1317,53 @@ namespace Edcore.GanttChart
             }
 
             return true;
+        }
+
+        public void SetActualEnd(T task, TimeSpan actualEnd)
+        {
+            if(task.End < task.ActualEnd)
+            {
+                task.ActualEnd = actualEnd;
+                task.Delay = task.ActualEnd - task.End;
+            }
+        }
+
+        public void SetDelay(T task, TimeSpan delay)
+        {
+            if (m_splitTaskOfPartMap.ContainsKey(task))
+            {
+                // task part belonging to a split task needs special treatment
+                var split = m_splitTaskOfPartMap[task];
+                var parts = m_partsOfSplitTaskMap[split];
+                
+                split.ActualEnd = task.End + delay;
+                split.Delay = delay;
+                var last = parts.Last();
+                last.ActualEnd = split.ActualEnd;
+                last.Delay = split.Delay;
+            }
+            else // regular task or a split task, which we will treat normally
+            {
+                // Set actual end
+                task.ActualEnd = task.End + delay;
+                task.Delay = delay;
+            }
+
+            // If member, check if delay affects group
+            if(IsMember(task))
+            {
+                var group = DirectGroupOf(task);
+
+                // Check if delay proceeds up the grouping chain
+                if(group.ActualEnd < task.ActualEnd)
+                {
+                    SetDelay(group, task.ActualEnd - group.ActualEnd);
+                }
+                else
+                {
+                    SetDelay(group, TimeSpan.Zero);
+                }
+            }   
         }
 
         public int GetFieldIndex(string name) // warning: for fields with duplicate names, can cause unwanted behavior
@@ -1347,7 +1412,7 @@ namespace Edcore.GanttChart
                     if (value < TimeSpan.Zero) value = TimeSpan.Zero;
                     if (this.DirectPrecedentsOf(task).Any())
                     {
-                        var max_end = this.DirectPrecedentsOf(task).Max(x => x.End);
+                        var max_end = this.DirectPrecedentsOf(task).Max(x => x.ActualEnd);
                         if (value <= max_end) value = max_end; // + One;
                     }
 
@@ -1360,6 +1425,7 @@ namespace Edcore.GanttChart
 
                     // affect self
                     task.End = task.Start + task.Duration;
+                    task.ActualEnd = task.End + task.Delay;
 
                     // calculate dependants
                     _RecalculateDependantsOf(task);
@@ -1441,6 +1507,7 @@ namespace Edcore.GanttChart
                     // assign end value
                     task.End = value;
                     task.Duration = task.End - task.Start;
+                    task.ActualEnd = task.End + task.Delay;
 
                     _RecalculateDependantsOf(task);
 
@@ -1448,6 +1515,7 @@ namespace Edcore.GanttChart
                     {
                         last_part.End = value;
                         last_part.Duration = last_part.End - last_part.Start;
+                        last_part.ActualEnd = last_part.End + last_part.Delay;
                     }
                 }
             }
@@ -1461,7 +1529,7 @@ namespace Edcore.GanttChart
             // check bounds
             if (this.DirectPrecedentsOf(split).Any())
             {
-                var max_end = this.DirectPrecedentsOf(split).Max(x => x.End);
+                var max_end = this.DirectPrecedentsOf(split).Max(x => x.ActualEnd);
                 if (value < max_end) value = max_end;
             }
             if (value < TimeSpan.Zero) value = TimeSpan.Zero;
@@ -1473,6 +1541,7 @@ namespace Edcore.GanttChart
             var duration = part.End - part.Start;
             part.Start = value;
             part.End = value + duration;
+            part.ActualEnd = part.End + part.Delay;
 
             // pack packs
             if (backwards) _PackPartsBackwards(parts);
@@ -1482,6 +1551,7 @@ namespace Edcore.GanttChart
             split.Start = parts.First().Start; // recalculate the split task
             split.End = parts.Last().End;
             split.Duration = split.End - split.Start;
+            split.ActualEnd = split.End + split.Delay;
 
             _RecalculateDependantsOf(split);
         }
@@ -1500,6 +1570,7 @@ namespace Edcore.GanttChart
             // set end value and duration
             part.End = value;
             part.Duration = part.End - part.Start;
+            part.ActualEnd = part.End + part.Delay;
 
             // pack parts
             if (increased) _PackPartsForward(parts);
@@ -1508,6 +1579,7 @@ namespace Edcore.GanttChart
             split.Start = parts.First().Start; // recalculate the split task
             split.End = parts.Last().End;
             split.Duration = split.End - split.Start;
+            split.ActualEnd = split.End + split.Delay;
 
             _RecalculateDependantsOf(split);
         }
@@ -1588,14 +1660,21 @@ namespace Edcore.GanttChart
                     t_complete += part.Complete * part.Duration.Ticks;
                     t_duration += part.Duration;
                 }
+
+                // Add delay from complete of last part
+                var lastPart = m_partsOfSplitTaskMap[groupOrSplit].Last();
+                t_complete += lastPart.Complete * groupOrSplit.Delay.Ticks;
+                t_duration += lastPart.Delay;
             }
             else
             {
                 foreach (var member in this.DirectMembersOf(groupOrSplit))
                 {
-                    t_duration += member.Duration;
-                    if (this.IsGroup(member)) t_complete += _RecalculateCompletedHelper(member) * member.Duration.Ticks;
-                    else t_complete += member.Complete * member.Duration.Ticks;
+                    var memberDuration = member.Duration + member.Delay;
+
+                    t_duration += memberDuration;
+                    if (this.IsGroup(member)) t_complete += _RecalculateCompletedHelper(member) * memberDuration.Ticks;
+                    else t_complete += member.Complete * memberDuration.Ticks;
                 }
             }
 
@@ -1610,8 +1689,8 @@ namespace Edcore.GanttChart
             // affect decendants
             foreach (var dependant in this.DirectDependantsOf(precedent))
             {
-                if (dependant.Start < precedent.End)
-                    this._SetStartHelper(dependant, precedent.End);
+                if (dependant.Start < precedent.ActualEnd)
+                    this._SetStartHelper(dependant, precedent.ActualEnd);
             }
         }
 
@@ -1626,24 +1705,40 @@ namespace Edcore.GanttChart
 
         private void _RecalculateAncestorsScheduleHelper(T group)
         {
+            // Reset delay
+            group.Delay = TimeSpan.Zero;
+
             float t_complete = 0;
             TimeSpan t_duration = TimeSpan.Zero;
             var start = TimeSpan.MaxValue;
             var end = TimeSpan.MinValue;
-            foreach (var member in this.DirectMembersOf(group))
+            var delay = TimeSpan.Zero;
+
+            foreach (var member in DirectMembersOf(group))
             {
-                if (this.IsGroup(member))
+                if (IsGroup(member))
                     _RecalculateAncestorsScheduleHelper(member);
 
-                t_duration += member.Duration;
-                t_complete += member.Complete * member.Duration.Ticks;
-                if (member.Start < start) start = member.Start;
-                if (member.End > end) end = member.End;
+                delay += member.Delay;
+                t_duration += member.Duration + member.Delay;
+                t_complete += member.Complete * (member.Duration + member.Delay).Ticks;
+                if (member.Start < start)
+                    start = member.Start;
+                if (member.ActualEnd > end)
+                    end = member.ActualEnd;
             }
 
-            this._SetStartHelper(group, start);
-            this._SetEndHelper(group, end);
-            this._SetCompleteHelper(group, t_complete / t_duration.Ticks);
+            _SetStartHelper(group, start);
+            _SetEndHelper(group, end);
+            _SetCompleteHelper(group, t_complete / t_duration.Ticks);
+
+            // Calculations on delay
+            TimeSpan proportionalDelay = TimeSpan.FromTicks(Convert.ToInt64(((float) delay.Ticks / t_duration.Ticks) * group.Duration.Ticks));
+
+            group.ActualEnd = group.End;
+            group.Duration -= proportionalDelay;
+            group.End -= proportionalDelay;
+            group.Delay = proportionalDelay;
         }
 
         private void _RecalculateSlack()

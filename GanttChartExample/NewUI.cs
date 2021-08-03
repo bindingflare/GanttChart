@@ -18,12 +18,13 @@ namespace Edcore.GanttChart
     /// </summary>
     public partial class NewUI : Form
     {
-        OverlayPainter _mOverlay = new OverlayPainter();
+        OverlayPainter m_Overlay = new OverlayPainter();
         ProjectManager m_Manager = null;
         Form taskForm = null;
 
+        private int _splitterX;
         private int _scrollFix = 0;
-        private bool isPanning = false;
+        private bool _isPanning = false;
         private bool _searchMode = false;
         private Task m_SelectedTask;
         private OLVColumn m_SelectedTaskColumn;
@@ -57,7 +58,7 @@ namespace Edcore.GanttChart
             // Set width of Tasklist using splitter
             m_SplitContainer.SplitterDistance = 400;
 
-            GenerateListView(m_TaskList, m_Manager.HeaderList);
+            _GenerateListView(m_TaskList, m_Manager.HeaderList);
 
             // Perform some task operations
             _registerCustomField("Important", "string", 80.0f);
@@ -79,13 +80,13 @@ namespace Edcore.GanttChart
             m_Manager.Add(hair);
             m_Manager.Add(pack);
 
-            m_Manager.SetField(work, 6, "Hello");
-            m_Manager.SetField(wake, 6, "HI");
-            m_Manager.SetField(teeth, 6, "hey");
-            m_Manager.SetField(shower, 6, "Yo");
-            m_Manager.SetField(clothes, 6, "Greetings");
-            m_Manager.SetField(hair, 6, "Good morning");
-            m_Manager.SetField(pack, 6, "Good evening");
+            m_Manager.SetField(work, 7, "Hello");
+            m_Manager.SetField(wake, 7, "HI");
+            m_Manager.SetField(teeth, 7, "hey");
+            m_Manager.SetField(shower, 7, "Yo");
+            m_Manager.SetField(clothes, 7, "Greetings");
+            m_Manager.SetField(hair, 7, "Good morning");
+            m_Manager.SetField(pack, 7, "Good evening");
 
             var job1 = new MyTask(m_Manager) { Name = "Job1" };
             var job2 = new MyTask(m_Manager) { Name = "Job2" };
@@ -103,15 +104,21 @@ namespace Edcore.GanttChart
             m_Manager.Add(job6);
             m_Manager.Add(job7);
 
-            m_Manager.SetField(job1, 6, "Hello");
-            m_Manager.SetField(job2, 6, "HI");
-            m_Manager.SetField(job3, 6, "hey");
-            m_Manager.SetField(job4, 6, "Yo");
-            m_Manager.SetField(job5, 6, "Greetings");
-            m_Manager.SetField(job6, 6, "Good morning");
-            m_Manager.SetField(job7, 6, "Good evening");
+            m_Manager.SetField(job1, 7, "Hello");
+            m_Manager.SetField(job2, 7, "HI");
+            m_Manager.SetField(job3, 7, "hey");
+            m_Manager.SetField(job4, 7, "Yo");
+            m_Manager.SetField(job5, 7, "Greetings");
+            m_Manager.SetField(job6, 7, "Good morning");
+            m_Manager.SetField(job7, 7, "Good evening");
 
             //m_Manager.SetField(work, "Important", "Yes");
+
+            // Test delay
+            m_Manager.SetDelay(job2, new TimeSpan(3, 0, 0, 0));
+            m_Manager.SetDelay(job3, new TimeSpan(1, 0, 0, 0));
+            m_Manager.SetDelay(job4, new TimeSpan(7, 0, 0, 0));
+            m_Manager.SetDelay(job7, new TimeSpan(3, 0, 0, 0));
 
             // Create another 1000 tasks for stress testing
             Random rand = new Random();
@@ -168,13 +175,13 @@ namespace Edcore.GanttChart
             m_Manager.Group(job1, job3);
             m_Manager.Group(job1, job4);
             m_Manager.Group(job1, job5);
-            m_Manager.Group(job1, job6);
+            //m_Manager.Group(job1, job6);
             m_Manager.Group(job1, job7);
             m_Manager.Relate(job2, job3);
             m_Manager.Relate(job2, job4);
             m_Manager.Relate(job4, job5);
-            m_Manager.Relate(job4, job6);
-            m_Manager.Relate(job6, job7);
+            //m_Manager.Relate(job4, job6);
+            //m_Manager.Relate(job6, job7);
             m_Manager.Relate(job5, job7);
 
             // Create and assign Resources.
@@ -218,8 +225,8 @@ namespace Edcore.GanttChart
             m_Chart.TaskSelected += new EventHandler<TaskMouseEventArgs>(m_Chart_TaskSelected);
             m_Chart.TaskDeselecting += new EventHandler<TaskMouseEventArgs>(m_Chart_TaskDeselecting);
             m_Chart.TaskMouseDoubleClick += new EventHandler<TaskMouseEventArgs>(m_Chart_TaskMouseDoubleClick);
-            _mOverlay.PrintMode = true;
-            m_Chart.PaintOverlay += _mOverlay.ChartOverlayPainter;
+            m_Overlay.PrintMode = true;
+            m_Chart.PaintOverlay += m_Overlay.ChartOverlayPainter;
             m_Chart.AllowTaskDragDrop = true;
             //m_Chart.Scroll += new ScrollEventHandler(m_Chart_Scroll);
             m_Chart.MouseWheel += new MouseEventHandler(m_Chart_MouseWheel);
@@ -249,8 +256,11 @@ namespace Edcore.GanttChart
             };
 
             // Splitter event listeners
-            m_SplitContainer.SplitterMoved += new SplitterEventHandler(m_SplitContainer_SplitterMoved);
-
+            //m_SplitContainer.SplitterMoving += new SplitterCancelEventHandler(m_SplitContainer_SplitterMoving);
+            //m_SplitContainer.SplitterMoved += new SplitterEventHandler(m_SplitContainer_SplitterMoved);
+            m_SplitContainer.MouseDown += new MouseEventHandler(m_SplitContainer_MouseDown);
+            m_SplitContainer.MouseUp += new MouseEventHandler(m_SplitContainer_MouseUp);
+            m_SplitContainer.MouseMove += new MouseEventHandler(m_SplitContainer_MouseMove);
 
             // Set some tooltips to show the resources in each task
             //_mChart.SetToolTip(wake, string.Join(", ", _mManager.ResourcesOf(wake).Select(x => (x as MyResource).Name)));
@@ -277,12 +287,14 @@ namespace Edcore.GanttChart
             _InitExampleUI();
         }
 
+        
+
         private void m_Chart_MousePan(object sender, MousePanEventArgs e)
         {
             // Prevent tasklist's Scroll event from mixing with panning functionality
-            isPanning = true;
+            _isPanning = true;
             m_TaskList.LowLevelScroll(0, e.StartLocation.Y - e.PreviousLocation.Y);
-            isPanning = false;
+            _isPanning = false;
         }
 
         private void m_Tasklist_ColumnRightClick(object sender, ColumnClickEventArgs e)
@@ -373,6 +385,11 @@ namespace Edcore.GanttChart
 
         }
 
+        private void m_SplitContainer_SplitterMoving(object sender, SplitterCancelEventArgs e)
+        {
+            m_SplitContainer.SuspendLayout();
+        }
+
         private void m_SplitContainer_SplitterMoved(object sender, SplitterEventArgs e)
         {
             float maxSize = 0;
@@ -386,7 +403,61 @@ namespace Edcore.GanttChart
 
             if (e.X > maxSize)
             {
-                m_SplitContainer.SplitterDistance = (int)maxSize + 20;
+                m_SplitContainer.SplitterDistance = (int)maxSize + 24;
+            }
+        }
+
+        private void m_SplitContainer_MouseDown(object sender, MouseEventArgs e)
+        {
+            ((SplitContainer)sender).IsSplitterFixed = true;
+
+            // Calculate max size
+            float maxSize = 0;
+            foreach (OLVColumn column in m_TaskList.AllColumns)
+            {
+                if (column.IsVisible)
+                {
+                    maxSize += column.Width;
+                }
+            }
+
+            _splitterX = (int) maxSize + 24;
+        }
+        
+        private void m_SplitContainer_MouseUp(object sender, MouseEventArgs e)
+        {
+            ((SplitContainer)sender).IsSplitterFixed = false;
+        }
+        
+        private void m_SplitContainer_MouseMove(object sender, MouseEventArgs e)
+        {
+            // Check to make sure the splitter won't be updated by the
+            // normal move behavior also
+            if (((SplitContainer)sender).IsSplitterFixed)
+            {
+                if (e.Button.Equals(MouseButtons.Left))
+                {
+                    if (((SplitContainer)sender).Orientation.Equals(Orientation.Vertical))
+                    {
+                        // Update splitter distance and refresh
+                        int newSize = e.X;
+
+                        if (newSize > 0)
+                        {
+                            if(newSize > _splitterX)
+                            {
+                                newSize = _splitterX;
+                            }
+                            
+                            ((SplitContainer)sender).SplitterDistance = newSize;
+                            ((SplitContainer)sender).Refresh();
+                        }
+                    }
+                }
+                else
+                {
+                    ((SplitContainer)sender).IsSplitterFixed = false;
+                }
             }
         }
 
@@ -461,7 +532,7 @@ namespace Edcore.GanttChart
 
         private void m_TaskList_Scroll(object sender, ScrollEventArgs e)
         {
-            if (e.ScrollOrientation == ScrollOrientation.VerticalScroll && !isPanning)
+            if (e.ScrollOrientation == ScrollOrientation.VerticalScroll && !_isPanning)
             {
                 m_Chart.Viewport.Y = (e.NewValue + _scrollFix) * m_Chart.BarSpacing;
             }
@@ -499,7 +570,7 @@ namespace Edcore.GanttChart
             //float h2 = m_Chart.Viewport.WorldHeight;
         }
 
-        public void GenerateListView(ObjectListView objectListView, List<Header> headerList)
+        private void _GenerateListView(ObjectListView objectListView, List<Header> headerList)
         {
             List<OLVColumn> columnsList = new List<OLVColumn>();
 
@@ -647,7 +718,7 @@ namespace Edcore.GanttChart
             // restart tasklist
             m_TaskList.Reset();
             m_TaskList.Roots = m_Manager.RootTasks;
-            GenerateListView(m_TaskList, m_Manager.HeaderList);
+            _GenerateListView(m_TaskList, m_Manager.HeaderList);
         }
 
         private void mnuHelpAbout_Click(object sender, EventArgs e)
@@ -678,7 +749,7 @@ namespace Edcore.GanttChart
 
         private void mnuViewIntructions_Click(object sender, EventArgs e)
         {
-            _mOverlay.PrintMode = !(mnuViewIntructions.Checked = !mnuViewIntructions.Checked);
+            m_Overlay.PrintMode = !(mnuViewIntructions.Checked = !mnuViewIntructions.Checked);
             m_Chart.Invalidate();
             //m_Tasklist.Invalidate();
         }
@@ -1430,6 +1501,23 @@ namespace Edcore.GanttChart
                 }
             }
         }
+
+        private void setDelayToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string input;
+            if (_promptString("Enter new delay", "Set delay", m_SelectedTask.Delay.ToString("g"), "Wrong input", out input))
+            {
+                m_Manager.SetDelay(m_SelectedTask, TimeSpan.Parse(input));
+                m_TaskList.Invalidate();
+                m_Chart.Invalidate();
+            }
+        }
+
+        private void toggleSmartViewToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            m_Chart.smartView = toggleSmartViewToolStripMenuItem.Checked = !toggleSmartViewToolStripMenuItem.Checked;
+            m_Chart.Invalidate();
+        }
     }
 
     #region overlay painter
@@ -1526,7 +1614,7 @@ namespace Edcore.GanttChart
         /// <returns></returns>
         public override string ToString()
         {
-            string str = string.Format("[Name: {0}, Start: {1}, End: {2}, Duration: {3}, Complete: {4}, CanExpand: {5}, IsCollapsed: {6}, IsFiltered: {7}, UserFields: ", Name, Start, End, Duration, Complete, CanExpand, IsCollapsed, IsFiltered);
+            string str = string.Format("[Name: {0}, Start: {1}, End: {2}, Actual End: {3}, Delay: {4}, Duration: {5}, Complete: {6}, CanExpand: {7}, IsCollapsed: {8}, IsFiltered: {9}, UserFields: ", Name, Start, End, ActualEnd, Delay, Duration, Complete, CanExpand, IsCollapsed, IsFiltered);
 
             for (int i = 0; i < CustomFieldsData.Length - 1; i++)
             {

@@ -32,10 +32,7 @@ namespace Edcore.GanttChart
         /// <summary>
         /// Get or set the Name of this Task
         /// </summary>
-        [OLVColumn(Width = 200)]
         public string Name { get; set; }
-
-
 
         /// <summary>
         /// Get or set the pecentage complete of this task, expressed in float between 0.0 and 1.0f.
@@ -45,19 +42,21 @@ namespace Edcore.GanttChart
         /// <summary>
         /// Get the start time of this Task relative to the project start
         /// </summary>
-        [OLVColumn(Width = 120, AspectToStringFormat = "{0:G}")]
         public TimeSpan Start { get; internal set; }
 
         /// <summary>
         /// Get the end time of this Task relative to the project start
         /// </summary>
-        [OLVColumn(Width = 120, AspectToStringFormat = "{0:G}")]
         public TimeSpan End { get; internal set; }
+
+        /// <summary>
+        /// Get the actual end time of this Task relative to the project start
+        /// </summary>
+        public TimeSpan ActualEnd { get; internal set; }
 
         /// <summary>
         /// Get the duration of this Task in days
         /// </summary>
-        [OLVColumn(Width = 120, AspectToStringFormat = "{0:G}")]
         public TimeSpan Duration { get; internal set; }
 
         /// <summary>
@@ -66,9 +65,13 @@ namespace Edcore.GanttChart
         public TimeSpan Slack { get; internal set; }
 
         /// <summary>
+        /// Get the delay of this task in days
+        /// </summary>
+        public TimeSpan Delay { get; internal set; }
+
+        /// <summary>
         /// Get or set user defined fields data of task
         /// </summary>
-        [OLVColumn(Width = 100)]
         public string[] CustomFieldsData { get; internal set; }
 
         public string getCustomFieldData(int index)
@@ -97,7 +100,7 @@ namespace Edcore.GanttChart
         /// <returns></returns>
         public override string ToString()
         {
-            string str = string.Format("[Name: {0}, Start: {1}, End: {2}, Duration: {3}, Complete: {4}, CanExpand: {5}, IsCollapsed: {6}, IsFiltered: {7}, UserFields: ", Name, Start, End, Duration, Complete);
+            string str = string.Format("[Name: {0}, Start: {1}, End: {2}, Actual End: {3}, Delay: {4}, Duration: {5}, Complete: {6}, CanExpand: {7}, IsCollapsed: {8}, IsFiltered: {9}, UserFields: ", Name, Start, End, ActualEnd, Delay, Duration, Complete, CanExpand, IsCollapsed, IsFiltered);
 
             for (int i = 0; i < CustomFieldsData.Length - 1; i++)
             {
@@ -276,6 +279,16 @@ namespace Edcore.GanttChart
         /// <param name="task"></param>
         /// <param name="duration">Number of timescale units between ProjectManager.Start</param>
         void SetDuration(T task, TimeSpan duration);
+        /// <summary>
+        /// Set actual end of the specified task.
+        /// </summary>
+        /// <param name="name">Name of custom field</param>
+        void SetActualEnd(T task, TimeSpan delay);
+        /// <summary>
+        /// Set the delay in time since end of the specified task.
+        /// </summary>
+        /// <param name="name">Name of custom field</param>
+        void SetDelay(T task, TimeSpan delay);
         /// <summary>
         /// Add a custom field.
         /// </summary>

@@ -72,12 +72,16 @@ namespace Edcore.GanttChart
             this.Margin = new Padding(0, 0, 0, 0);
             this.Padding = new Padding(0, 0, 0, 0);
             // Formatting
+            HatchBrush myHatchBrush = new HatchBrush(HatchStyle.ForwardDiagonal, Color.PaleVioletRed, Color.Transparent);
+
             TaskFormat = new Edcore.GanttChart.TaskFormat()
             {
                 Color = Brushes.Black,
                 Border = Pens.Maroon,
                 BackFill = Brushes.MediumSlateBlue,
                 ForeFill = Brushes.YellowGreen,
+                DelayBackFill = myHatchBrush,
+                DelayForeFill = Brushes.PaleVioletRed,
                 SlackFill = new System.Drawing.Drawing2D.HatchBrush(System.Drawing.Drawing2D.HatchStyle.LightDownwardDiagonal, Color.Blue, Color.Transparent)
             };
             CriticalTaskFormat = new Edcore.GanttChart.TaskFormat()
@@ -86,6 +90,8 @@ namespace Edcore.GanttChart
                 Border = Pens.Maroon,
                 BackFill = Brushes.Crimson,
                 ForeFill = Brushes.YellowGreen,
+                DelayBackFill = myHatchBrush,
+                DelayForeFill = Brushes.PaleVioletRed,
                 SlackFill = new System.Drawing.Drawing2D.HatchBrush(System.Drawing.Drawing2D.HatchStyle.LightDownwardDiagonal, Color.Red, Color.Transparent)
             };
             HeaderFormat = new Edcore.GanttChart.HeaderFormat()
@@ -96,7 +102,7 @@ namespace Edcore.GanttChart
                 GradientDark = SystemColors.ButtonFace
             };
         }
-        
+
         /// <summary>
         /// Delegate method for creating a new Task. Creates Task by default.
         /// </summary>
@@ -241,7 +247,7 @@ namespace Edcore.GanttChart
         /// Occurs when a Task is clicked
         /// </summary>
         public event EventHandler<TaskMouseEventArgs> TaskMouseClick = null;
-        
+
         /// <summary>
         /// Occurs when a Task is double clicked by the mouse
         /// </summary>
@@ -593,7 +599,7 @@ namespace Edcore.GanttChart
 
             // Check if mouse is in task list
             // If so, do not do anything
-            if (task != null)
+            if (task != null && _mDraggedTask == null)
             {
                 if (_isWithinHitBoxEdge(_mChartTaskHitRects[task], deviceLocation, 10))
                     this.Cursor = Cursors.SizeWE;
@@ -715,7 +721,7 @@ namespace Edcore.GanttChart
             this.Cursor = Cursors.Default;
 
             // Complete mouse panning
-            if(_mPanViewStartLocation != _mPanViewLastLocation)
+            if (_mPanViewStartLocation != _mPanViewLastLocation)
             {
                 OnMousePan(new MousePanEventArgs(_mPanViewStartLocation, _mPanViewLastLocation, e.Button, e.Clicks, e.X, e.Y, e.Delta));
             }
@@ -744,13 +750,13 @@ namespace Edcore.GanttChart
         protected override void OnMouseDoubleClick(MouseEventArgs e)
         {
             var deviceLocation = Viewport.DeviceToWorldCoord(e.Location);
-            
+
             var task = _GetTaskUnderMouse(e.Location);
             if (task != null)
             {
                 OnTaskMouseDoubleClick(new TaskMouseEventArgs(task, _mChartTaskHitRects[task], e.Button, e.Clicks, e.X, e.Y, e.Delta));
             }
-            
+
             base.OnMouseDoubleClick(e);
         }
 
@@ -771,7 +777,7 @@ namespace Edcore.GanttChart
         {
             TaskMouseOver?.Invoke(this, e);
 
-            //this.cursor = Cursors.Hand;
+            this.Cursor = Cursors.Hand;
 
             var task = e.Task;
             if (m_Project.IsPart(e.Task)) task = m_Project.SplitTaskOf(task);
@@ -781,7 +787,7 @@ namespace Edcore.GanttChart
                 this.Invalidate();
             }
         }
-        
+
         /// <summary>
         /// Raises the TaskMouseOut event
         /// </summary>
@@ -817,8 +823,18 @@ namespace Edcore.GanttChart
             // Default drag behaviors **********************************
             if (e.Button == System.Windows.Forms.MouseButtons.Middle)
             {
-                var complete = e.Source.Complete + (float)(e.X - e.PreviousLocation.X) / GetSpan(e.Source.Duration);
-                m_Project.SetComplete(e.Source, complete);
+                if (m_Project.IsPart(e.Source))
+                {
+                    // Use delay of split task
+                    var complete = e.Source.Complete + (float)(e.X - e.PreviousLocation.X) / GetSpan(e.Source.Duration + m_Project.SplitTaskOf(e.Source).Delay);
+                    m_Project.SetComplete(e.Source, complete);
+
+                }
+                else
+                {
+                    var complete = e.Source.Complete + (float)(e.X - e.PreviousLocation.X) / GetSpan(e.Source.Duration + e.Source.Delay);
+                    m_Project.SetComplete(e.Source, complete);
+                }
             }
             else if (e.Button == System.Windows.Forms.MouseButtons.Right || e.Button == MouseButtons.Left && isNearEdge)
             {
@@ -1032,7 +1048,7 @@ namespace Edcore.GanttChart
         protected virtual void OnTaskDeselecting(TaskMouseEventArgs e)
         {
             TaskDeselecting?.Invoke(this, e);
-            
+
             // deselect all tasks
             _mSelectedTasks.Clear();
         }
@@ -1236,6 +1252,7 @@ namespace Edcore.GanttChart
             _mChartTaskRects.Clear();
             _mChartTaskHitRects.Clear();
             _mChartSlackRects.Clear();
+            _mChartDelayRects.Clear();
             _mChartTaskPartRects.Clear();
 
             var pHeight = this.Parent == null ? this.Height : this.Parent.Height;
@@ -1252,7 +1269,7 @@ namespace Edcore.GanttChart
                     RectangleF taskRect;
 
                     // Compute task rectangle
-                    taskRect = new RectangleF(GetSpan(task.Start), yCoord, GetSpan(task.Duration), this.BarHeight);
+                    taskRect = new RectangleF(GetSpan(task.Start), yCoord, GetSpan(task.Duration + task.Delay), this.BarHeight);
                     _mChartTaskRects.Add(task, taskRect); // also add groups and split tasks (not just task parts)
 
                     if (!m_Project.IsSplit(task))
@@ -1264,20 +1281,43 @@ namespace Edcore.GanttChart
                     {
                         var parts = new List<KeyValuePair<Task, RectangleF>>();
                         _mChartTaskPartRects.Add(task, parts);
-                        foreach (var part in m_Project.PartsOf(task))
+
+                        var taskParts = m_Project.PartsOf(task);
+                        for (int i = 0; i < taskParts.Count() - 1; i++)
                         {
-                            taskRect = new RectangleF(GetSpan(part.Start), yCoord, GetSpan(part.Duration), this.BarHeight);
+                            var part = taskParts.ElementAt(i);
+
+                            taskRect = new RectangleF(GetSpan(part.Start), yCoord, GetSpan(part.Duration), this.BarHeight); // parts do not implement delay
                             parts.Add(new KeyValuePair<Task, RectangleF>(part, taskRect));
 
                             // Parts are mouse enabled, add to hitRect collection
                             _mChartTaskHitRects.Add(part, taskRect);
                         }
+
+                        // add delay as part of split task
+                        var lastPart = taskParts.Last();
+
+                        var delayRect = new RectangleF(GetSpan(lastPart.Start), yCoord, GetSpan(lastPart.Duration + task.Delay), this.BarHeight);
+                        parts.Add(new KeyValuePair<Task, RectangleF>(lastPart, delayRect));
+                        _mChartTaskHitRects.Add(lastPart, delayRect);
+                    }
+                    float xCoord = GetSpan(task.End);
+
+                    // Compute Delay Rectangles
+                    if (task.ActualEnd != task.End)
+                    {
+                        float span = GetSpan(task.Delay);
+
+                        var delayRect = new RectangleF(xCoord, yCoord, span, this.BarHeight);
+                        _mChartDelayRects.Add(task, delayRect);
+
+                        xCoord += span;
                     }
 
                     // Compute Slack Rectangles
                     if (this.ShowSlack)
                     {
-                        var slackRect = new RectangleF(GetSpan(task.End), yCoord, GetSpan(task.Slack), this.BarHeight);
+                        var slackRect = new RectangleF(xCoord, yCoord, GetSpan(task.Slack), this.BarHeight);
                         _mChartSlackRects.Add(task, slackRect);
                     }
 
@@ -1287,12 +1327,12 @@ namespace Edcore.GanttChart
                     row++;
                 }
             }
-            
+
             // Update for listtask
             RowCount = row;
 
             //Viewport.WorldHeight = Math.Max(pHeight, row * this.BarSpacing + this.BarHeight);
-            Viewport.WorldHeight = Math.Max(pHeight, (row + 1)* BarSpacing + HeaderOneHeight + HeaderTwoHeight + Viewport.HorizontalScroll.ClientSize.Height); // LAZYFIX: Add single row to world height to keep sync with task_list when scrolled to the bottom
+            Viewport.WorldHeight = Math.Max(pHeight, (row + 1) * BarSpacing + HeaderOneHeight + HeaderTwoHeight + Viewport.HorizontalScroll.ClientSize.Height); // LAZYFIX: Add single row to world height to keep sync with task_list when scrolled to the bottom
             Viewport.WorldWidth = Math.Max(pWidth, GetSpan(end) + 200);
         }
 
@@ -1374,7 +1414,7 @@ namespace Edcore.GanttChart
                 // highlight weekends for day time scale
                 if (date.DayOfWeek == DayOfWeek.Sunday || date.DayOfWeek == DayOfWeek.Saturday)
                 {
-                    var pattern = new System.Drawing.Drawing2D.HatchBrush(System.Drawing.Drawing2D.HatchStyle.Percent20, this.HeaderFormat.Border.Color, Color.Transparent);
+                    var pattern = new HatchBrush(HatchStyle.Percent20, this.HeaderFormat.Border.Color, Color.Transparent);
                     graphics.FillRectangle(pattern, _mHeaderInfo.Columns[i]);
                 }
             }
@@ -1494,6 +1534,11 @@ namespace Edcore.GanttChart
             {
                 // Get the taskrect
                 var taskRect = _mChartTaskRects[task];
+                var delayRect = RectangleF.Empty;
+                if (_mChartDelayRects.ContainsKey(task))
+                {
+                    delayRect = _mChartDelayRects[task];
+                }
 
                 // Only begin drawing when the taskrect is to the left of the clipRect's right edge
                 if (taskRect.Left <= viewRect.Right)
@@ -1512,7 +1557,7 @@ namespace Edcore.GanttChart
                         }
                         else
                         {
-                            __DrawRegularTaskAndGroup(graphics, e, task, taskRect);
+                            __DrawRegularTaskAndGroup(graphics, e, task, taskRect, delayRect);
                         }
                     }
 
@@ -1527,7 +1572,6 @@ namespace Edcore.GanttChart
                             graphics.DrawString(completion, e.Font, e.Format.Color, compRect);
                         }
                     }
-
 
                     // Draw slack
                     if (this.ShowSlack && task.Complete < 1.0f)
@@ -1556,7 +1600,7 @@ namespace Edcore.GanttChart
             RectangleF clipRectF = new RectangleF(viewRect.X, viewRect.Y, viewRect.Width, viewRect.Height);
             foreach (var precedent in m_Project.Precedents)
             {
-                if(!precedent.IsFiltered)
+                if (!precedent.IsFiltered)
                 {
                     foreach (var dependant in m_Project.DirectDependantsOf(precedent))
                     {
@@ -1627,17 +1671,94 @@ namespace Edcore.GanttChart
             }
         }
 
-        private void __DrawRegularTaskAndGroup(Graphics graphics, TaskPaintEventArgs e, Task task, RectangleF taskRect)
+        private void __DrawRegularTaskAndGroup(Graphics graphics, TaskPaintEventArgs e, Task task, RectangleF taskRect, RectangleF delayRect)
         {
             var fill = taskRect;
+            var delayFill = delayRect;
             fill.Width = (int)(fill.Width * task.Complete);
-            graphics.FillRectangle(e.Format.BackFill, taskRect);
-            graphics.FillRectangle(e.Format.ForeFill, fill);
-            graphics.DrawRectangle(e.Format.Border, taskRect);
+
+            // Calculate delayed complete rect
+            if (fill.Right > delayFill.Left)
+            {
+                delayFill.Width = fill.Right - delayFill.Left;
+            }
+            else
+            {
+                delayFill = Rectangle.Empty;
+            }
 
             // check if this is a parent task / group task, then draw the bracket
             if (m_Project.IsGroup(task))
             {
+                if(smartView)
+                {
+                    // smart view - displays delay of group only when all tasks at specific time are delayed
+                    List<RectangleF> nonDelayRectangles = new List<RectangleF>();
+                    List<RectangleF> delayRectangles = new List<RectangleF>();
+
+                    graphics.FillRectangle(e.Format.BackFill, _mChartTaskRects[task]);
+                    graphics.DrawRectangle(e.Format.Border, _mChartTaskRects[task]);
+
+                    foreach (Task member in m_Project.MembersOf(task))
+                    {
+                        nonDelayRectangles.Add(new RectangleF(GetSpan(member.Start), taskRect.Top, GetSpan(member.Duration), taskRect.Height));
+                        delayRectangles.Add(new RectangleF(GetSpan(member.End), taskRect.Top, GetSpan(member.Delay), taskRect.Height));
+                    }
+                    
+                    // Remove space covered by task
+                    for (int i = 0; i < delayRectangles.Count; i++)
+                    {
+                        RectangleF registeredRect = delayRectangles.ElementAt(i);
+                        
+                        foreach(RectangleF removeRect in nonDelayRectangles)
+                        {
+                            if (registeredRect.X > removeRect.X && registeredRect.Width < removeRect.Width)
+                            {
+                                // Remove whole registeredRect
+                                delayRectangles.RemoveAt(i);
+                                break;
+                            }
+                            if (registeredRect.IntersectsWith(removeRect))
+                            {
+                                registeredRect.X = Math.Max(registeredRect.X, removeRect.X);
+                                float endX = Math.Min(registeredRect.X + registeredRect.Width, removeRect.X + removeRect.Width);
+                                registeredRect.Width = endX - registeredRect.X;
+                            }
+                        }
+                    }
+
+                    foreach(RectangleF delay in delayRectangles)
+                    {
+                        graphics.FillRectangle(e.Format.DelayBackFill, delay);
+                    }
+
+                    graphics.FillRectangle(e.Format.ForeFill, fill);
+
+                    foreach (RectangleF delay in delayRectangles)
+                    {
+                        if(fill.IntersectsWith(delay))
+                        {
+                            float x = Math.Max(fill.X, delay.X);
+                            float endX = Math.Min(fill.X + fill.Width, delay.X + delay.Width);
+                            graphics.FillRectangle(e.Format.DelayForeFill, new RectangleF(x, fill.Y, endX - x, fill.Height));
+                        }
+                    }
+                }
+                else
+                {
+                    graphics.FillRectangle(e.Format.BackFill, taskRect);
+
+                    // Draw delay
+                    if (_mChartDelayRects.ContainsKey(task))
+                    {
+                        graphics.FillRectangle(e.Format.DelayBackFill, delayRect);
+                    }
+
+                    graphics.FillRectangle(e.Format.ForeFill, fill);
+                    graphics.FillRectangle(e.Format.DelayForeFill, delayFill);
+                    graphics.DrawRectangle(e.Format.Border, taskRect);
+                }
+
                 var rod = new RectangleF(taskRect.Left, taskRect.Top, taskRect.Width, taskRect.Height / 2);
                 graphics.FillRectangle(Brushes.Black, rod);
 
@@ -1654,6 +1775,20 @@ namespace Edcore.GanttChart
                                 new PointF() { X = taskRect.Right, Y = taskRect.Top + BarHeight },
                                 new PointF() { X = taskRect.Right - MinorWidth / 2f, Y = taskRect.Top } });
                 }
+            }
+            else
+            {
+                graphics.FillRectangle(e.Format.BackFill, taskRect);
+
+                // Draw delay
+                if (_mChartDelayRects.ContainsKey(task))
+                {
+                    graphics.FillRectangle(e.Format.DelayBackFill, delayRect);
+                }
+
+                graphics.FillRectangle(e.Format.ForeFill, fill);
+                graphics.FillRectangle(e.Format.DelayForeFill, delayFill);
+                graphics.DrawRectangle(e.Format.Border, taskRect);
             }
         }
 
@@ -1675,6 +1810,26 @@ namespace Edcore.GanttChart
 
             // Draw % complete indicators
             graphics.FillRectangles(e.Format.ForeFill, parts.Select(x => new RectangleF(x.Value.X, x.Value.Y, x.Value.Width * x.Key.Complete, x.Value.Height)).ToArray());
+
+            // Draw delay
+            if (_mChartDelayRects.ContainsKey(task))
+            {
+                var delayRect = _mChartDelayRects[task];
+                graphics.FillRectangle(e.Format.DelayBackFill, delayRect);
+
+                // Calculated delayed complete rect
+                var delayFill = _mChartDelayRects[task];
+                var completionX = lastRect.X + lastRect.Width * parts[parts.Count - 1].Key.Complete;
+                if (completionX > delayFill.Left)
+                {
+                    delayFill.Width = completionX - delayFill.Left;
+                }
+                else
+                {
+                    delayFill = Rectangle.Empty;
+                }
+                graphics.FillRectangle(e.Format.DelayForeFill, delayFill);
+            }
 
             // Draw border
             graphics.DrawRectangles(e.Format.Border, taskRects);
@@ -1735,10 +1890,12 @@ namespace Edcore.GanttChart
         Dictionary<Task, RectangleF> _mChartTaskRects = new Dictionary<Task, RectangleF>();
         Dictionary<Task, List<KeyValuePair<Task, RectangleF>>> _mChartTaskPartRects = new Dictionary<Task, List<KeyValuePair<Task, RectangleF>>>();
         Dictionary<Task, RectangleF> _mChartSlackRects = new Dictionary<Task, RectangleF>();
+        Dictionary<Task, RectangleF> _mChartDelayRects = new Dictionary<Task, RectangleF>();
         HeaderInfo _mHeaderInfo = new HeaderInfo();
         Task _mBarMouseEntered = null; // flag whether the mouse has entered a hitbox of a task or not
         Dictionary<Task, string> _mTaskToolTip = new Dictionary<Task, string>();
 
+        public bool smartView = true;
         bool isNearEdge;
         bool isDragStart;
         #endregion Private Helper Variables
@@ -1777,6 +1934,16 @@ namespace Edcore.GanttChart
         /// Get or set Task foreground color
         /// </summary>
         public Brush ForeFill { get; set; }
+
+        /// <summary>
+        /// Get or set Task delay background color
+        /// </summary>
+        public Brush DelayBackFill { get; set; }
+
+        /// <summary>
+        /// Get or set Task delay foreground color
+        /// </summary>
+        public Brush DelayForeFill { get; set; }
 
         /// <summary>
         /// Get or set Task font color
