@@ -64,6 +64,7 @@ namespace Edcore.GanttChart
             this.mnuViewIntructions = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.showAllHeadersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toggleSmartViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tasksToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.taskListToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.taskTreeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -118,7 +119,6 @@ namespace Edcore.GanttChart
             this.m_TaskList = new BrightIdeasSoftware.TreeListView();
             this.projectTitleLabel = new System.Windows.Forms.Label();
             this.m_Chart = new Edcore.GanttChart.GanttChart();
-            this.toggleSmartViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.taskMenuStrip.SuspendLayout();
@@ -396,6 +396,15 @@ namespace Edcore.GanttChart
             this.showAllHeadersToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
             this.showAllHeadersToolStripMenuItem.Text = "Show all headers";
             this.showAllHeadersToolStripMenuItem.Click += new System.EventHandler(this.showAllHeadersToolStripMenuItem_Click);
+            // 
+            // toggleSmartViewToolStripMenuItem
+            // 
+            this.toggleSmartViewToolStripMenuItem.Checked = true;
+            this.toggleSmartViewToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.toggleSmartViewToolStripMenuItem.Name = "toggleSmartViewToolStripMenuItem";
+            this.toggleSmartViewToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
+            this.toggleSmartViewToolStripMenuItem.Text = "Toggle SmartView";
+            this.toggleSmartViewToolStripMenuItem.Click += new System.EventHandler(this.toggleSmartViewToolStripMenuItem_Click);
             // 
             // tasksToolStripMenuItem
             // 
@@ -930,13 +939,6 @@ namespace Edcore.GanttChart
             this.m_Chart.Padding = new System.Windows.Forms.Padding(5);
             this.m_Chart.Size = new System.Drawing.Size(852, 680);
             this.m_Chart.TabIndex = 2;
-            // 
-            // toggleSmartViewToolStripMenuItem
-            // 
-            this.toggleSmartViewToolStripMenuItem.Name = "toggleSmartViewToolStripMenuItem";
-            this.toggleSmartViewToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
-            this.toggleSmartViewToolStripMenuItem.Text = "Toggle SmartView";
-            this.toggleSmartViewToolStripMenuItem.Click += new System.EventHandler(this.toggleSmartViewToolStripMenuItem_Click);
             // 
             // NewUI
             // 

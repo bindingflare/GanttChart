@@ -1697,6 +1697,7 @@ namespace Edcore.GanttChart
                     List<RectangleF> delayRectangles = new List<RectangleF>();
 
                     graphics.FillRectangle(e.Format.BackFill, _mChartTaskRects[task]);
+                    graphics.DrawRectangle(e.Format.Border, _mChartTaskRects[task]);
 
                     foreach (Task member in m_Project.MembersOf(task))
                     {

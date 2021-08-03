@@ -1515,7 +1515,7 @@ namespace Edcore.GanttChart
 
         private void toggleSmartViewToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            m_Chart.smartView = !m_Chart.smartView;
+            m_Chart.smartView = toggleSmartViewToolStripMenuItem.Checked = !toggleSmartViewToolStripMenuItem.Checked;
             m_Chart.Invalidate();
         }
     }
