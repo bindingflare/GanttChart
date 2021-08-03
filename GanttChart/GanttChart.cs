@@ -72,12 +72,16 @@ namespace Edcore.GanttChart
             this.Margin = new Padding(0, 0, 0, 0);
             this.Padding = new Padding(0, 0, 0, 0);
             // Formatting
+            HatchBrush myHatchBrush = new HatchBrush(HatchStyle.ForwardDiagonal, Color.PaleVioletRed, Color.Transparent);
+
             TaskFormat = new Edcore.GanttChart.TaskFormat()
             {
                 Color = Brushes.Black,
                 Border = Pens.Maroon,
                 BackFill = Brushes.MediumSlateBlue,
                 ForeFill = Brushes.YellowGreen,
+                DelayBackFill = myHatchBrush,
+                DelayForeFill = Brushes.PaleVioletRed,
                 SlackFill = new System.Drawing.Drawing2D.HatchBrush(System.Drawing.Drawing2D.HatchStyle.LightDownwardDiagonal, Color.Blue, Color.Transparent)
             };
             CriticalTaskFormat = new Edcore.GanttChart.TaskFormat()
@@ -86,6 +90,8 @@ namespace Edcore.GanttChart
                 Border = Pens.Maroon,
                 BackFill = Brushes.Crimson,
                 ForeFill = Brushes.YellowGreen,
+                DelayBackFill = myHatchBrush,
+                DelayForeFill = Brushes.PaleVioletRed,
                 SlackFill = new System.Drawing.Drawing2D.HatchBrush(System.Drawing.Drawing2D.HatchStyle.LightDownwardDiagonal, Color.Red, Color.Transparent)
             };
             HeaderFormat = new Edcore.GanttChart.HeaderFormat()
@@ -593,7 +599,7 @@ namespace Edcore.GanttChart
 
             // Check if mouse is in task list
             // If so, do not do anything
-            if (task != null)
+            if (task != null && _mDraggedTask == null)
             {
                 if (_isWithinHitBoxEdge(_mChartTaskHitRects[task], deviceLocation, 10))
                     this.Cursor = Cursors.SizeWE;
@@ -771,7 +777,7 @@ namespace Edcore.GanttChart
         {
             TaskMouseOver?.Invoke(this, e);
 
-            //this.cursor = Cursors.Hand;
+            this.Cursor = Cursors.Hand;
 
             var task = e.Task;
             if (m_Project.IsPart(e.Task)) task = m_Project.SplitTaskOf(task);
@@ -1408,7 +1414,7 @@ namespace Edcore.GanttChart
                 // highlight weekends for day time scale
                 if (date.DayOfWeek == DayOfWeek.Sunday || date.DayOfWeek == DayOfWeek.Saturday)
                 {
-                    var pattern = new System.Drawing.Drawing2D.HatchBrush(System.Drawing.Drawing2D.HatchStyle.Percent20, this.HeaderFormat.Border.Color, Color.Transparent);
+                    var pattern = new HatchBrush(HatchStyle.Percent20, this.HeaderFormat.Border.Color, Color.Transparent);
                     graphics.FillRectangle(pattern, _mHeaderInfo.Columns[i]);
                 }
             }
@@ -1722,8 +1728,7 @@ namespace Edcore.GanttChart
 
                     foreach(RectangleF delay in delayRectangles)
                     {
-                        HatchBrush myHatchBrush = new HatchBrush(HatchStyle.ForwardDiagonal, Color.PaleVioletRed, Color.Transparent);
-                        graphics.FillRectangle(myHatchBrush, delay);
+                        graphics.FillRectangle(e.Format.DelayBackFill, delay);
                     }
 
                     graphics.FillRectangle(e.Format.ForeFill, fill);
@@ -1734,7 +1739,7 @@ namespace Edcore.GanttChart
                         {
                             float x = Math.Max(fill.X, delay.X);
                             float endX = Math.Min(fill.X + fill.Width, delay.X + delay.Width);
-                            graphics.FillRectangle(Brushes.PaleVioletRed, new RectangleF(x, fill.Y, endX - x, fill.Height));
+                            graphics.FillRectangle(e.Format.DelayForeFill, new RectangleF(x, fill.Y, endX - x, fill.Height));
                         }
                     }
                 }
@@ -1745,12 +1750,11 @@ namespace Edcore.GanttChart
                     // Draw delay
                     if (_mChartDelayRects.ContainsKey(task))
                     {
-                        HatchBrush myHatchBrush = new HatchBrush(HatchStyle.ForwardDiagonal, Color.PaleVioletRed, Color.Transparent);
-                        graphics.FillRectangle(myHatchBrush, delayRect);
+                        graphics.FillRectangle(e.Format.DelayBackFill, delayRect);
                     }
 
                     graphics.FillRectangle(e.Format.ForeFill, fill);
-                    graphics.FillRectangle(Brushes.PaleVioletRed, delayFill);
+                    graphics.FillRectangle(e.Format.DelayForeFill, delayFill);
                     graphics.DrawRectangle(e.Format.Border, taskRect);
                 }
 
@@ -1778,12 +1782,11 @@ namespace Edcore.GanttChart
                 // Draw delay
                 if (_mChartDelayRects.ContainsKey(task))
                 {
-                    HatchBrush myHatchBrush = new HatchBrush(HatchStyle.ForwardDiagonal, Color.PaleVioletRed, Color.Transparent);
-                    graphics.FillRectangle(myHatchBrush, delayRect);
+                    graphics.FillRectangle(e.Format.DelayBackFill, delayRect);
                 }
 
                 graphics.FillRectangle(e.Format.ForeFill, fill);
-                graphics.FillRectangle(Brushes.PaleVioletRed, delayFill);
+                graphics.FillRectangle(e.Format.DelayForeFill, delayFill);
                 graphics.DrawRectangle(e.Format.Border, taskRect);
             }
         }
@@ -1811,13 +1814,11 @@ namespace Edcore.GanttChart
             if (_mChartDelayRects.ContainsKey(task))
             {
                 var delayRect = _mChartDelayRects[task];
-                HatchBrush myHatchBrush = new HatchBrush(HatchStyle.ForwardDiagonal, Color.PaleVioletRed, Color.Transparent);
-                graphics.FillRectangle(myHatchBrush, delayRect);
+                graphics.FillRectangle(e.Format.DelayBackFill, delayRect);
 
                 // Calculated delayed complete rect
                 var delayFill = _mChartDelayRects[task];
-                var lastPart = parts.Last();
-                var completionX = lastPart.Value.X + lastPart.Value.Width * lastPart.Key.Complete;
+                var completionX = lastRect.X + lastRect.Width * parts[parts.Count - 1].Key.Complete;
                 if (completionX > delayFill.Left)
                 {
                     delayFill.Width = completionX - delayFill.Left;
@@ -1826,7 +1827,7 @@ namespace Edcore.GanttChart
                 {
                     delayFill = Rectangle.Empty;
                 }
-                graphics.FillRectangle(Brushes.PaleVioletRed, delayFill);
+                graphics.FillRectangle(e.Format.DelayForeFill, delayFill);
             }
 
             // Draw border
@@ -1932,6 +1933,16 @@ namespace Edcore.GanttChart
         /// Get or set Task foreground color
         /// </summary>
         public Brush ForeFill { get; set; }
+
+        /// <summary>
+        /// Get or set Task delay background color
+        /// </summary>
+        public Brush DelayBackFill { get; set; }
+
+        /// <summary>
+        /// Get or set Task delay foreground color
+        /// </summary>
+        public Brush DelayForeFill { get; set; }
 
         /// <summary>
         /// Get or set Task font color
