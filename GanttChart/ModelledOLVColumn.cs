@@ -87,7 +87,7 @@ namespace Edcore.GanttChart
         {
             m_Manager = project;
             AspectGetter = delegate (object x) { return ((Task)x).Duration; };
-            AspectPutter = delegate (object x, object value) { m_Manager.SetDuration((Task)x, (TimeSpan)value); };
+            AspectPutter = delegate (object x, object value) { m_Manager.SetDuration((Task)x, TimeSpan.Parse((string)value)); };
             AspectToStringFormat = DataFormats.TimeSpanFormat;
         }
     }
@@ -113,7 +113,7 @@ namespace Edcore.GanttChart
         {
             m_Manager = project;
             AspectGetter = delegate (object x) { return ((Task)x).Delay; };
-            AspectPutter = delegate (object x, object value) { m_Manager.SetDelay((Task)x, (TimeSpan)value); };
+            AspectPutter = delegate (object x, object value) { m_Manager.SetDelay((Task)x, TimeSpan.Parse((string)value)); };
             AspectToStringFormat = DataFormats.TimeSpanFormat;
         }
     }

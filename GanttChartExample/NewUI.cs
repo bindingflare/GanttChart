@@ -26,8 +26,11 @@ namespace Edcore.GanttChart
         private int _ScrollFix = 0;
         private bool _IsPanning = false;
         private bool _SearchMode = false;
+        private int _ListY;
+        private float _ChartY;
         private Task m_SelectedTask;
         private OLVColumn m_SelectedTaskColumn;
+        private bool _IsSearchScroll = false;
 
         /// <summary>
         /// Example starts here
@@ -373,6 +376,12 @@ namespace Edcore.GanttChart
             {
                 _SearchMode = false;
                 m_SearchTextBox.Text = "Search...";
+                
+                // Restore scroll state
+                _IsSearchScroll = false;
+                m_TaskList.LowLevelScroll(0, _ListY - m_TaskList.LowLevelScrollPosition.Y);
+                m_Chart.Viewport.Y = _ListY;
+                _IsSearchScroll = true;
             }
         }
 
@@ -393,18 +402,11 @@ namespace Edcore.GanttChart
 
         private void m_SplitContainer_SplitterMoved(object sender, SplitterEventArgs e)
         {
-            float maxSize = 0;
-            foreach (OLVColumn column in m_TaskList.AllColumns)
-            {
-                if (column.IsVisible)
-                {
-                    maxSize += column.Width;
-                }
-            }
+            int maxSize = _SplitterMaxSizeHelper();
 
             if (e.X > maxSize)
             {
-                m_SplitContainer.SplitterDistance = (int)maxSize + 24;
+                m_SplitContainer.SplitterDistance = maxSize + 24;
             }
         }
 
@@ -413,17 +415,10 @@ namespace Edcore.GanttChart
             ((SplitContainer)sender).IsSplitterFixed = true;
 
             // Calculate max size
-            float maxSize = 0;
-            foreach (OLVColumn column in m_TaskList.AllColumns)
-            {
-                if (column.IsVisible)
-                {
-                    maxSize += column.Width;
-                }
-            }
-
-            _SplitterX = (int) maxSize + 24;
+            _SplitterX = _SplitterMaxSizeHelper() + 24;
         }
+
+        
         
         private void m_SplitContainer_MouseUp(object sender, MouseEventArgs e)
         {
@@ -533,7 +528,7 @@ namespace Edcore.GanttChart
 
         private void m_TaskList_Scroll(object sender, ScrollEventArgs e)
         {
-            if (e.ScrollOrientation == ScrollOrientation.VerticalScroll && !_IsPanning)
+            if (e.ScrollOrientation == ScrollOrientation.VerticalScroll && !_IsPanning && !_IsSearchScroll)
             {
                 m_Chart.Viewport.Y = (e.NewValue + _ScrollFix) * m_Chart.BarSpacing;
             }
@@ -1236,6 +1231,63 @@ namespace Edcore.GanttChart
 
         }
 
+        private void showAllHeadersToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (OLVColumn column in m_TaskList.AllColumns)
+            {
+                column.IsVisible = true;
+            }
+
+            m_TaskList.RebuildColumns();
+            //m_TaskList.Invalidate();
+        }
+
+        private void editFieldToolStripMenuItem_Click_1(object sender, EventArgs e)
+        {
+            int input;
+            if (_promptList("Select a field to edit", "Edit custom field", m_Manager.GetHeaderNames(), out input))
+            {
+                string header = m_Manager.HeaderList[input].Text;
+
+                string input2;
+                if (_promptString("Change name of header [" + header + "] to:", "Edit header", header, "Task name cannot be empty", out input2))
+                {
+                    m_Manager.HeaderList[input].Text = input2;
+                    m_TaskList.AllColumns[input].Text = input2;
+                    m_TaskList.RebuildColumns();
+                }
+            }
+        }
+
+        private void setDelayToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string input;
+            if (_promptString("Enter new delay", "Set delay", m_SelectedTask.Delay.ToString("g"), "Wrong input", out input))
+            {
+                m_Manager.SetDelay(m_SelectedTask, TimeSpan.Parse(input));
+                m_TaskList.Invalidate();
+                m_Chart.Invalidate();
+            }
+        }
+
+        private void toggleSmartViewToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            m_Chart.SmartView = toggleSmartViewToolStripMenuItem.Checked = !toggleSmartViewToolStripMenuItem.Checked;
+            m_Chart.Invalidate();
+        }
+
+        protected override void OnResize(EventArgs e)
+        {
+            base.OnResize(e);
+
+            int maxSize = _SplitterMaxSizeHelper();
+
+            if (m_SplitContainer.SplitterDistance > maxSize && maxSize != 0) // avoid changing splitter distance at initialization phase (when maxSize is 0)
+            {
+               m_SplitContainer.SplitterDistance = (int)maxSize + 24;
+            }
+        }
+
         private void _SearchTasksWordsInTextBox()
         {
             if (!m_SearchTextBox.Text.Equals("Search..."))
@@ -1291,9 +1343,21 @@ namespace Edcore.GanttChart
                             }
                         }
                     }
+
+                    m_TaskList.Invalidate();
+
+                    // Save last positions of list and chart
+                    _ListY = m_TaskList.LowLevelScrollPosition.Y;
+                    _ChartY = m_Chart.Viewport.Y;
+
+                    // Reset scroll positions
+                    _IsSearchScroll = true;
+                    m_TaskList.LowLevelScroll(0, -_ListY);
+                    m_Chart.Viewport.Y = 0;
+                    _IsSearchScroll = false;
                 }
             }
-
+            
             m_Chart.Invalidate();
         }
 
@@ -1442,50 +1506,21 @@ namespace Edcore.GanttChart
             return contains;
         }
 
-        private void showAllHeadersToolStripMenuItem_Click(object sender, EventArgs e)
+        private int _SplitterMaxSizeHelper()
         {
+            int maxSize = 0;
             foreach (OLVColumn column in m_TaskList.AllColumns)
             {
-                column.IsVisible = true;
-            }
-
-            m_TaskList.RebuildColumns();
-            //m_TaskList.Invalidate();
-        }
-
-        private void editFieldToolStripMenuItem_Click_1(object sender, EventArgs e)
-        {
-            int input;
-            if (_promptList("Select a field to edit", "Edit custom field", m_Manager.GetHeaderNames(), out input))
-            {
-                string header = m_Manager.HeaderList[input].Text;
-
-                string input2;
-                if (_promptString("Change name of header [" + header + "] to:", "Edit header", header, "Task name cannot be empty", out input2))
+                if (column.IsVisible)
                 {
-                    m_Manager.HeaderList[input].Text = input2;
-                    m_TaskList.AllColumns[input].Text = input2;
-                    m_TaskList.RebuildColumns();
+                    maxSize += column.Width;
                 }
             }
+
+            return maxSize;
         }
 
-        private void setDelayToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            string input;
-            if (_promptString("Enter new delay", "Set delay", m_SelectedTask.Delay.ToString("g"), "Wrong input", out input))
-            {
-                m_Manager.SetDelay(m_SelectedTask, TimeSpan.Parse(input));
-                m_TaskList.Invalidate();
-                m_Chart.Invalidate();
-            }
-        }
-
-        private void toggleSmartViewToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            m_Chart.SmartView = toggleSmartViewToolStripMenuItem.Checked = !toggleSmartViewToolStripMenuItem.Checked;
-            m_Chart.Invalidate();
-        }
+        
     }
 
     #region overlay painter
