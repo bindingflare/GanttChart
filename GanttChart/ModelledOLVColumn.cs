@@ -133,6 +133,8 @@ namespace Edcore.GanttChart
             }
             else if(type == "checkbox")
             {
+                CheckBoxes = true;
+
                 if (bool.Parse((string)dummyValue))
                 {
                     DummyValue = "True";  

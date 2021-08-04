@@ -573,11 +573,8 @@ namespace Edcore.GanttChart
 
         private void _GenerateListView(ObjectListView objectListView, List<ModelledOLVColumn> headerList)
         {
-            List<OLVColumn> columnsList = new List<OLVColumn>();
-
             foreach(ModelledOLVColumn modeller in headerList)
             {
-                columnsList.Add(modeller);
                 objectListView.AllColumns.Add(modeller);
             }
 
@@ -585,7 +582,7 @@ namespace Edcore.GanttChart
             //objectListView.SmallImageList = ;
             //objectListView.Columns.Add(new SmallImageList); TODO
 
-            objectListView.Columns.AddRange(columnsList.Cast<ColumnHeader>().ToArray());
+            objectListView.Columns.AddRange(headerList.Cast<ColumnHeader>().ToArray());
             objectListView.RebuildColumns();
         }
 
