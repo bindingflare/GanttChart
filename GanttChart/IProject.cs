@@ -112,35 +112,6 @@ namespace Edcore.GanttChart
         }
     }
 
-    public class Header
-    {
-        public Header(string title, string type, int index, float size) : this(title, type, index, size, true, false) { }
-
-        public Header(string title, string type, int index, float size, bool editable, bool hidden)
-        {
-            Title = title;
-            Type = type;
-            Index = index;
-            Size = size;
-            
-            Editable = editable;
-            Hidden = hidden;
-        }
-
-        public string Title { get; set; }
-
-        public string Type { get; }
-        public int Index { get; set; }
-
-        public float Size { get; set; }
-
-        public bool Editable { get; set; }
-
-        public bool Hidden { get; set; }
-
-        public override string ToString() => $"(Index = {Index}, Title = {Title}, Type = {Type}, Size = {Size})";
-    }
-
     /// <summary>
     /// ProjectManager interface
     /// </summary>
@@ -293,16 +264,12 @@ namespace Edcore.GanttChart
         /// Add a custom field.
         /// </summary>
         /// <param name="name">Name of custom field</param>
-        void AddCustomField(string name, string type, float size);
+        void AddCustomField(string name, string type, int size);
         /// <summary>
         /// Remove a custom field.
         /// </summary>
         /// <param name="name">Name of custom field</param>
         void RemoveCustomField(int index);
-        /// <summary>
-        /// Get the field index from a name
-        /// </summary>
-        int GetFieldIndex(string name);
         /// <summary>
         /// Get the header names
         /// </summary>

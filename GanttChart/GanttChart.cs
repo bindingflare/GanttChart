@@ -703,8 +703,8 @@ namespace Edcore.GanttChart
                 {
                     PointF point = Viewport.DeviceToWorldCoord(e.Location);
                     RectangleF rect = _mChartTaskHitRects[_mDraggedTask];
-                    isNearEdge = _isWithinHitBoxEdge(rect, point, 10);
-                    isDragStart = rect.Left + 10 > point.X;
+                    _IsNearEdge = _isWithinHitBoxEdge(rect, point, 10);
+                    _IsDragStart = rect.Left + 10 > point.X;
                 }
             }
 
@@ -735,7 +735,7 @@ namespace Edcore.GanttChart
                 int row = _DeviceCoordToChartRow(e.Location.Y);
                 OnTaskMouseDrop(new TaskDragDropEventArgs(_mDragTaskStartLocation, _mDragTaskLastLocation, _mDraggedTask, _mChartTaskHitRects[_mDraggedTask], target, targetRect, row, e.Button, e.Clicks, e.X, e.Y, e.Delta));
                 _mDraggedTask = null;
-                isNearEdge = false;
+                _IsNearEdge = false;
                 _mDragTaskLastLocation = Point.Empty;
                 _mDragTaskStartLocation = Point.Empty;
             }
@@ -836,7 +836,7 @@ namespace Edcore.GanttChart
                     m_Project.SetComplete(e.Source, complete);
                 }
             }
-            else if (e.Button == System.Windows.Forms.MouseButtons.Right || e.Button == MouseButtons.Left && isNearEdge)
+            else if (e.Button == System.Windows.Forms.MouseButtons.Right || e.Button == MouseButtons.Left && _IsNearEdge)
             {
                 if (e.Target == null)
                 {
@@ -844,7 +844,7 @@ namespace Edcore.GanttChart
 
                     _mOverlay.DraggedRect = e.SourceRect;
 
-                    if (isDragStart)
+                    if (_IsDragStart)
                     {
                         _mOverlay.DraggedRect.X += delta;
                         _mOverlay.DraggedRect.Width -= delta;
@@ -898,7 +898,7 @@ namespace Edcore.GanttChart
 
             var delta = (e.PreviousLocation.X - e.StartLocation.X);
 
-            if (e.Button == System.Windows.Forms.MouseButtons.Left && !isNearEdge)
+            if (e.Button == System.Windows.Forms.MouseButtons.Left && !_IsNearEdge)
             {
                 if (e.Target == null)
                 {
@@ -943,13 +943,13 @@ namespace Edcore.GanttChart
                     }
                 }
             }
-            else if (e.Button == System.Windows.Forms.MouseButtons.Right || e.Button == MouseButtons.Left && isNearEdge)
+            else if (e.Button == System.Windows.Forms.MouseButtons.Right || e.Button == MouseButtons.Left && _IsNearEdge)
             {
                 if (e.Target == null)
                 {
                     TimeSpan duration;
 
-                    if (isDragStart)
+                    if (_IsDragStart)
                     {
                         TimeSpan diff = GetSpan(delta);
                         m_Project.SetStart(e.Source, e.Source.Start + diff);
@@ -1690,7 +1690,7 @@ namespace Edcore.GanttChart
             // check if this is a parent task / group task, then draw the bracket
             if (m_Project.IsGroup(task))
             {
-                if(smartView)
+                if(SmartView)
                 {
                     // smart view - displays delay of group only when all tasks at specific time are delayed
                     List<RectangleF> nonDelayRectangles = new List<RectangleF>();
@@ -1895,9 +1895,9 @@ namespace Edcore.GanttChart
         Task _mBarMouseEntered = null; // flag whether the mouse has entered a hitbox of a task or not
         Dictionary<Task, string> _mTaskToolTip = new Dictionary<Task, string>();
 
-        public bool smartView = true;
-        bool isNearEdge;
-        bool isDragStart;
+        public bool SmartView = true;
+        private bool _IsNearEdge;
+        private bool _IsDragStart;
         #endregion Private Helper Variables
     }
 

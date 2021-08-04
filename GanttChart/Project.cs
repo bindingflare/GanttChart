@@ -36,7 +36,7 @@ namespace Edcore.GanttChart
         Dictionary<T, T> m_groupOfMemberMap = new Dictionary<T, T>(); // Map member task to parent group task
         Dictionary<T, int> m_taskIndicesMap = new Dictionary<T, int>(); // Map the task to its zero-based index order position
 
-        public List<Header> HeaderList; // Map the userFields to array position in Task.UserFields
+        public List<ModelledOLVColumn> HeaderList; // Map the userFields to array position in Task.UserFields
 
         public float FieldMinSize = 20;
         public float FieldMaxSize = 1000;
@@ -51,17 +51,18 @@ namespace Edcore.GanttChart
             Name = projectName;
 
             // Add default headers
-            HeaderList = new List<Header>();
-            HeaderList.Add(new Header("Name", "tree", 0, 200f));
-            HeaderList.Add(new Header("ID", "string", 1, 60f, false, true));
-            HeaderList.Add(new Header("Start", "date", 2, 125f));
-            HeaderList.Add(new Header("End", "date", 3, 125f));
-            HeaderList.Add(new Header("Duration", "time", 4, 80f));
-            HeaderList.Add(new Header("Complete", "string", 5, 60f, true, true));
-            HeaderList.Add(new Header("Delay", "string", 6, 80f));
+            HeaderList = new List<ModelledOLVColumn>();
+            HeaderList.Add(new NameColumn(0, 200));
+            HeaderList.Add(new IDColumn(1, 60, false));
+            HeaderList.Add(new StartColumn(this as ProjectManager<Task, object>, 2, 125, true));
+            HeaderList.Add(new EndColumn(this as ProjectManager<Task, object>, 3, 125, true));
+            HeaderList.Add(new DurationColumn(this as ProjectManager<Task, object>, 4, 80, true));
+            HeaderList.Add(new CompleteColumn(this as ProjectManager<Task, object>, 5, 60, false));
+            HeaderList.Add(new DelayColumn(this as ProjectManager<Task, object>, 6, 80, true));
 
             FieldCount = 7;
             MainFieldCount = 7;
+            CustomFieldCount = 0;
         }
 
         /// <summary>
@@ -80,9 +81,14 @@ namespace Edcore.GanttChart
         public int FieldCount { get; private set; }
 
         /// <summary>
-        /// Get the number of custom user fields
+        /// Get the number of main user fields
         /// </summary>
         public int MainFieldCount { get; private set; }
+
+        /// <summary>
+        /// Get the number of custom user fields
+        /// </summary>
+        public int CustomFieldCount { get; private set; }
 
         /// <summary>
         /// Get or set the starting date for this project
@@ -116,6 +122,16 @@ namespace Edcore.GanttChart
 
                 // Set custom fields size
                 task.CustomFieldsData = new string[FieldCount - MainFieldCount]; // TODO Add overload for task with customfieldsdata
+                _SetDummyValues(task);
+            }
+        }
+
+        private void _SetDummyValues(T task)
+        {
+            for(int i = 0; i < task.CustomFieldsData.Length; i++)
+            {
+                string dummy = (string)HeaderList[i + MainFieldCount].DummyValue;
+                task.CustomFieldsData[i] = dummy;
             }
         }
 
@@ -1106,13 +1122,27 @@ namespace Edcore.GanttChart
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public void AddCustomField(string name, string type, float size)
+        public void AddCustomField(string name, string type, int size)
         {
-            Header h = new Header(name, type, FieldCount, 150f);
-            h.Size = size;
-            HeaderList.Add(h);
+            string dummyValue;
+            if (type == "checkbox")
+            {
+                dummyValue = "False";
+            }
+            else if (type == "string")
+            {
+                dummyValue = "";
+            }
+            else
+            {
+                dummyValue = "NULL";
+            }
 
+            ModelledOLVColumn column = new CustomColumn(CustomFieldCount, size, name, type, CustomFieldCount, true, dummyValue);
+            HeaderList.Add(column);
+            
             FieldCount++;
+            CustomFieldCount++;
 
             // Update custom fields in each task
             int length = FieldCount - MainFieldCount;
@@ -1121,6 +1151,7 @@ namespace Edcore.GanttChart
             {
                 var arr = task.CustomFieldsData;
                 Array.Resize(ref arr, length);
+                arr[length - 1] = dummyValue;
 
                 task.CustomFieldsData = arr;
             }
@@ -1136,6 +1167,7 @@ namespace Edcore.GanttChart
             HeaderList.RemoveAt(index);
 
             FieldCount--;
+            CustomFieldCount--;
 
             // Update custom fields in each task
             int length = FieldCount - MainFieldCount;
@@ -1194,15 +1226,15 @@ namespace Edcore.GanttChart
                 case 1:
                     return task.ID;
                 case 2:
-                    return GetDateTime(task.Start).ToString("yyyy.MM.dd hh:mm:ss");
+                    return FormatData(GetDateTime(task.Start));
                 case 3:
-                    return GetDateTime(task.End).ToString("yyyy.MM.dd hh:mm:ss");
+                    return FormatData(GetDateTime(task.End));
                 case 4:
-                    return task.Duration.ToString(@"dd\.hh\:mm\:ss");
+                    return FormatData(task.Duration);
                 case 5:
                     return task.Complete.ToString("%");
                 default:
-                    return task.CustomFieldsData[index - MainFieldCount];
+                    return FormatData(task.CustomFieldsData[index - MainFieldCount]);
             }
         }
 
@@ -1241,24 +1273,12 @@ namespace Edcore.GanttChart
         {
             List<string> names = new List<string>();
 
-            foreach (Header h in HeaderList)
+            foreach (ModelledOLVColumn column in HeaderList)
             {
-                names.Add(h.Title);
+                names.Add(column.Text);
             }
 
             return names;
-        }
-
-        /// <summary>
-        /// Set a field's data using field header
-        /// </summary>
-        /// <param name="task"></param>
-        /// <param name="index">Field index</param>
-        /// <param name="data"></param>
-        /// <returns></returns>
-        public bool SetField(T task, Header header, string data)
-        {
-            return SetField(task, header.Index, data);
         }
 
         /// <summary>
@@ -1354,19 +1374,6 @@ namespace Edcore.GanttChart
             {
                 _RecalculateAncestorsScheduleHelper(DirectGroupOf(task));
             }   
-        }
-
-        public int GetFieldIndex(string name) // warning: for fields with duplicate names, can cause unwanted behavior
-        {
-            foreach (Header h in HeaderList)
-            {
-                if (h.Title.Equals(name))
-                {
-                    return h.Index;
-                }
-            }
-
-            return -1;
         }
 
         /// <summary>
