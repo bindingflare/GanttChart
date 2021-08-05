@@ -157,6 +157,9 @@ namespace Edcore.GanttChart
                     ((Task)x).CustomFieldsData[customFieldIndex] = (string)value;
                 };
             }
+            else if(false){
+                // TODO
+            }
             else
             {
                 throw new NotImplementedException();

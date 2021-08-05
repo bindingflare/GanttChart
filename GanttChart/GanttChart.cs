@@ -56,7 +56,7 @@ namespace Edcore.GanttChart
             HeaderOneHeight = 33;
             HeaderTwoHeight = 26;
             BarSpacing = 32;
-            BarHeight = 20;
+            BarHeight = 23;
             MajorWidth = 140;
             MinorWidth = 20;
             TimeResolution = TimeResolution.Day;
@@ -145,7 +145,7 @@ namespace Edcore.GanttChart
         /// <summary>
         /// Get or set header2 pixel height
         /// </summary>
-        [DefaultValue(20)]
+        [DefaultValue(23)]
         public int HeaderTwoHeight { get; set; }
 
         /// <summary>
@@ -157,7 +157,7 @@ namespace Edcore.GanttChart
         /// <summary>
         /// Get or set pixel height of each Task
         /// </summary>
-        [DefaultValue(20)]
+        [DefaultValue(28)]
         public int BarHeight { get; set; }
 
         /// <summary>

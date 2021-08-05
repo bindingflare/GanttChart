@@ -727,7 +727,7 @@ namespace Edcore.GanttChart
             this._mResourceGrid.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this._mResourceGrid.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.colName});
-            this._mResourceGrid.Location = new System.Drawing.Point(3, 343);
+            this._mResourceGrid.Location = new System.Drawing.Point(3, 337);
             this._mResourceGrid.Name = "_mResourceGrid";
             this._mResourceGrid.Size = new System.Drawing.Size(226, 164);
             this._mResourceGrid.TabIndex = 4;
@@ -777,7 +777,7 @@ namespace Edcore.GanttChart
             // 
             this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(3, 325);
+            this.label2.Location = new System.Drawing.Point(3, 319);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(76, 15);
             this.label2.TabIndex = 1;
@@ -790,7 +790,7 @@ namespace Edcore.GanttChart
             this._mTaskGrid.LineColor = System.Drawing.SystemColors.ControlDark;
             this._mTaskGrid.Location = new System.Drawing.Point(3, 3);
             this._mTaskGrid.Name = "_mTaskGrid";
-            this._mTaskGrid.Size = new System.Drawing.Size(226, 319);
+            this._mTaskGrid.Size = new System.Drawing.Size(226, 313);
             this._mTaskGrid.TabIndex = 3;
             // 
             // quickButtonPanel
@@ -803,7 +803,7 @@ namespace Edcore.GanttChart
             this.quickButtonPanel.Location = new System.Drawing.Point(927, 0);
             this.quickButtonPanel.Name = "quickButtonPanel";
             this.quickButtonPanel.Size = new System.Drawing.Size(357, 24);
-            this.quickButtonPanel.TabIndex = 10;
+            this.quickButtonPanel.TabIndex = 3;
             // 
             // m_SearchTextBox
             // 
@@ -814,7 +814,7 @@ namespace Edcore.GanttChart
             this.m_SearchTextBox.MaxLength = 30;
             this.m_SearchTextBox.Name = "m_SearchTextBox";
             this.m_SearchTextBox.Size = new System.Drawing.Size(173, 23);
-            this.m_SearchTextBox.TabIndex = 0;
+            this.m_SearchTextBox.TabIndex = 2;
             this.m_SearchTextBox.Text = "Search...";
             this.m_SearchTextBox.WordWrap = false;
             this.m_SearchTextBox.TextChanged += new System.EventHandler(this.searchTextBox_TextChanged);
@@ -826,7 +826,7 @@ namespace Edcore.GanttChart
             this._mRemoveButton.Location = new System.Drawing.Point(272, 0);
             this._mRemoveButton.Name = "_mRemoveButton";
             this._mRemoveButton.Size = new System.Drawing.Size(75, 23);
-            this._mRemoveButton.TabIndex = 1;
+            this._mRemoveButton.TabIndex = 3;
             this._mRemoveButton.Text = "Remove";
             this._mRemoveButton.UseVisualStyleBackColor = true;
             this._mRemoveButton.Click += new System.EventHandler(this.removeButton_Click);
@@ -836,7 +836,7 @@ namespace Edcore.GanttChart
             this._mAddButton.Location = new System.Drawing.Point(191, 0);
             this._mAddButton.Name = "_mAddButton";
             this._mAddButton.Size = new System.Drawing.Size(75, 23);
-            this._mAddButton.TabIndex = 0;
+            this._mAddButton.TabIndex = 2;
             this._mAddButton.Text = "Add";
             this._mAddButton.UseVisualStyleBackColor = true;
             this._mAddButton.Click += new System.EventHandler(this.addButton_Click);
@@ -909,7 +909,7 @@ namespace Edcore.GanttChart
             this.m_TaskList.SelectedColumnTint = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(180)))), ((int)(((byte)(180)))), ((int)(((byte)(180)))));
             this.m_TaskList.ShowGroups = false;
             this.m_TaskList.Size = new System.Drawing.Size(425, 648);
-            this.m_TaskList.TabIndex = 1;
+            this.m_TaskList.TabIndex = 0;
             this.m_TaskList.UseAlternatingBackColors = true;
             this.m_TaskList.UseCompatibleStateImageBehavior = false;
             this.m_TaskList.UseFilterIndicator = true;
@@ -929,6 +929,7 @@ namespace Edcore.GanttChart
             // m_Chart
             // 
             this.m_Chart.AllowTaskDragDrop = false;
+            this.m_Chart.BarHeight = 23;
             this.m_Chart.Dock = System.Windows.Forms.DockStyle.Fill;
             this.m_Chart.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.m_Chart.HeaderOneHeight = 33;
@@ -938,7 +939,7 @@ namespace Edcore.GanttChart
             this.m_Chart.Name = "m_Chart";
             this.m_Chart.Padding = new System.Windows.Forms.Padding(5);
             this.m_Chart.Size = new System.Drawing.Size(852, 680);
-            this.m_Chart.TabIndex = 2;
+            this.m_Chart.TabIndex = 1;
             // 
             // NewUI
             // 

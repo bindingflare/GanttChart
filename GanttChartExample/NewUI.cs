@@ -378,10 +378,10 @@ namespace Edcore.GanttChart
                 m_SearchTextBox.Text = "Search...";
                 
                 // Restore scroll state
-                _IsSearchScroll = false;
+                _IsSearchScroll = true;
                 m_TaskList.LowLevelScroll(0, _ListY - m_TaskList.LowLevelScrollPosition.Y);
                 m_Chart.Viewport.Y = _ListY;
-                _IsSearchScroll = true;
+                _IsSearchScroll = false;
             }
         }
 
